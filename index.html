@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -10,50 +9,48 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #f0f0f0; /* Цвет фона, можно поменять */
+            background-color: #f5f5f7;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            font-family: sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
         }
 
-        /* Сцена для 3D эффекта */
         .scene {
-            width: 300px; /* Ширина карты */
-            height: 100px; /* Высота карты (подгони под свои размеры) */
-            perspective: 600px;
+            width: 300px;  /* Ширина карточки на экране */
+            height: 120px; /* Высота карточки (подобрал под твои продолговатые карты) */
+            perspective: 1000px;
             cursor: pointer;
+            margin-bottom: 20px;
         }
 
-        /* Сама карта */
         .card {
             width: 100%;
             height: 100%;
             position: relative;
-            transition: transform 0.6s;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Плавная пружинистая анимация */
             transform-style: preserve-3d;
         }
 
-        /* Класс для переворота */
         .card.is-flipped {
             transform: rotateY(180deg);
         }
 
-        /* Стороны карты */
         .card__face {
             position: absolute;
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            border-radius: 15px; /* Закругление углов */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             display: flex;
             align-items: center;
             justify-content: center;
             background: white;
+            overflow: hidden; /* Чтобы картинка не вылезала за углы */
         }
 
         .card__face--front {
@@ -61,42 +58,42 @@
         }
 
         .card__face--back {
-            background-color: #fff; /* Цвет фона оборота */
+            background-color: #fff;
             transform: rotateY(180deg);
-            padding: 10px;
-            box-sizing: border-box;
-            text-align: center;
         }
 
         img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        /* Кнопка */
-        .draw-btn {
-            margin-top: 30px;
-            padding: 15px 30px;
-            background-color: #333;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.1s;
-        }
-
-        .draw-btn:active {
-            transform: scale(0.95);
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Картинка будет видна целиком */
+            display: block;
         }
 
         .instruction {
             margin-top: 10px;
-            color: #777;
+            color: #8e8e93;
             font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .draw-btn {
+            margin-top: 40px;
+            padding: 16px 32px;
+            background-color: #007aff; /* Цвет кнопки как в iOS */
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            transition: transform 0.1s, background-color 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .draw-btn:active {
+            transform: scale(0.96);
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -104,69 +101,137 @@
 
     <div class="scene" onclick="flipCard()">
         <div class="card" id="myCard">
-            <!-- ЛИЦЕВАЯ СТОРОНА -->
+            <!-- Лицевая сторона -->
             <div class="card__face card__face--front">
-                <img id="frontImg" src="" alt="Card Front">
+                <img id="frontImg" src="" alt="">
             </div>
-            <!-- ОБОРОТНАЯ СТОРОНА -->
+            <!-- Оборотная сторона -->
             <div class="card__face card__face--back">
-                <!-- Здесь может быть картинка или текст -->
-                <img id="backImg" src="" alt="Card Back">
-                <!-- Если нужен текст вместо картинки, раскомментируй ниже и убеди img -->
-                <!-- <p id="backText">Описание асаны</p> -->
+                <img id="backImg" src="" alt="">
             </div>
         </div>
     </div>
 
-    <div class="instruction">Нажми на карту, чтобы перевернуть</div>
+    <div class="instruction" id="hintText">Нажми на карту, чтобы увидеть суть</div>
 
-    <button class="draw-btn" onclick="drawNewCard()">Тянуть новую карту</button>
+    <button class="draw-btn" onclick="drawNewCard()">Тянуть карту</button>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Раскрываем на весь экран
+        tg.expand();
 
-        // КОНФИГУРАЦИЯ: Сколько у тебя всего карт?
-        const TOTAL_CARDS = 10; 
+        // ==========================================
+        // НАСТРОЙКИ: ВОТ ЗДЕСЬ ТВОИ КАРТОЧКИ
+        // ==========================================
         
-        // Путь к картинкам (предполагаем, что они лежат в папке img/)
-        // Имена файлов: 1.jpg, 2.jpg ... и 1_back.jpg, 2_back.jpg ...
+        // Просто перечисли названия файлов. 
+        // Важно: Файлы должны лежать в папке img/
         
+        const cardsDatabase = [
+            { 
+                front: 'reshimost.jpg',      // Имя файла картинки-слова
+                back: 'reshimost_back.jpg'   // Имя файла картинки-описания/асаны
+            },
+            { 
+                front: 'zabota.jpg', 
+                back: 'zabota_back.jpg' 
+            },
+            { 
+                front: 'igrivost.jpg', 
+                back: 'igrivost_back.jpg' 
+            },
+             { 
+                front: 'disciplina.jpg', 
+                back: 'back1.jpg' 
+            },
+             { 
+                front: 'igrivost.jpg', 
+                back: 'igrivost_back.jpg' 
+            },
+             { 
+                front: 'estestven.jpg', 
+                back: 'back2.jpg' 
+            },
+             { 
+                front: 'odnorod.jpg', 
+                back: 'odnorod_back.jpg' 
+            },
+             { 
+                front: 'otvaga.jpg', 
+                back: 'back2.jpg' 
+            },
+             { 
+                front: 'samobyt.jpg', 
+                back: 'back2.jpg' 
+            },
+              { 
+                front: 'smelost.jpg, 
+                back: 'back2.jpg' 
+            },
+              { 
+                front: 'starat.jpg', 
+                back: 'back2.jpg' 
+            },
+            { 
+                front: 'uporstvo.jpg', 
+                back: 'back2.jpg' 
+            },
+            { 
+                front: 'vnimat.jpg', 
+                back: 'back2.jpg' 
+            },
+            { 
+                front: 'zabota.jpg', 
+                back: 'back2.jpg' 
+            }
+                  
+            // Скопируй блок { ... }, чтобы добавить следующую карту
+            // Не забудь запятую между блоками!
+        ];
+
+        // ==========================================
+
         const cardElement = document.getElementById('myCard');
         const frontImg = document.getElementById('frontImg');
         const backImg = document.getElementById('backImg');
-
-        function getRandomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
+        const hintText = document.getElementById('hintText');
 
         function drawNewCard() {
-            // Сначала переворачиваем обратно, если перевернута
+            // Если карта перевернута, вернем её назад перед сменой
             if (cardElement.classList.contains('is-flipped')) {
                 cardElement.classList.remove('is-flipped');
-                // Ждем пока перевернется (300мс), потом меняем картинку
-                setTimeout(changeContent, 300);
+                setTimeout(updateImages, 300); // Ждем пока перевернется
             } else {
-                changeContent();
+                updateImages();
             }
         }
 
-        function changeContent() {
-            const randomId = getRandomInt(1, TOTAL_CARDS);
+        function updateImages() {
+            // Случайный выбор
+            const randomIndex = Math.floor(Math.random() * cardsDatabase.length);
+            const selectedPair = cardsDatabase[randomIndex];
+
+            // Подставляем пути к картинкам
+            // Внимание: здесь указана папка 'img/'
+            frontImg.src = 'img/' + selectedPair.front;
+            backImg.src = 'img/' + selectedPair.back;
             
-            // Логика подмены картинок
-            // ВАЖНО: Замени расширение .jpg на .png если у тебя png
-            frontImg.src = `img/${randomId}.jpg`;
-            backImg.src = `img/${randomId}_back.jpg`;
-            
-            // Если используешь текст, здесь можно массив с текстами подключить
+            // Если вдруг картинка не прогрузилась (опечатка), выведем ошибку в консоль
+            frontImg.onerror = function() { console.error("Не найдена картинка: " + this.src) };
         }
 
         function flipCard() {
             cardElement.classList.toggle('is-flipped');
+            
+            // Меняем текст подсказки
+            if (cardElement.classList.contains('is-flipped')) {
+                hintText.innerText = "Нажми еще раз, чтобы закрыть";
+            } else {
+                hintText.innerText = "Нажми на карту, чтобы увидеть суть";
+            }
         }
 
-        // Запуск при старте
+        // Запуск первой карты при старте
         drawNewCard();
 
     </script>
