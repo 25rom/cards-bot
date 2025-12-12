@@ -10,18 +10,62 @@
             margin: 0;
             padding: 0;
             background-color: #f5f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: #333;
+        }
+
+        /* === ЭКРАН ПРИВЕТСТВИЯ === */
+        #welcome-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 10;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: opacity 0.5s;
+        }
+
+        .welcome-gif {
+            width: 150px; /* Размер гифки */
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+
+        .welcome-text {
+            font-size: 18px;
+            line-height: 1.5;
+            color: #444;
+            max-width: 300px;
+            margin-bottom: 30px;
+        }
+
+        /* === ИГРОВАЯ СЦЕНА === */
+        #game-screen {
+            flex: 1;
+            display: none; /* Скрыто по умолчанию */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 1s;
         }
 
         .scene {
-            width: 300px;  /* Ширина карточки на экране */
-            height: 120px; /* Высота карточки (подобрал под твои продолговатые карты) */
+            width: 300px;
+            height: 120px;
             perspective: 1000px;
             cursor: pointer;
             margin-bottom: 20px;
@@ -31,7 +75,7 @@
             width: 100%;
             height: 100%;
             position: relative;
-            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Плавная пружинистая анимация */
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             transform-style: preserve-3d;
         }
 
@@ -50,188 +94,275 @@
             align-items: center;
             justify-content: center;
             background: white;
-            overflow: hidden; /* Чтобы картинка не вылезала за углы */
-        }
-
-        .card__face--front {
-            background-color: #fff;
+            overflow: hidden;
         }
 
         .card__face--back {
-            background-color: #fff;
             transform: rotateY(180deg);
         }
 
         img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Картинка будет видна целиком */
+            object-fit: contain;
             display: block;
         }
 
-        .instruction {
-            margin-top: 10px;
+        .hint-text {
+            margin-top: 15px;
             color: #8e8e93;
             font-size: 14px;
-            opacity: 0.8;
+            text-align: center;
         }
 
-        .draw-btn {
-            margin-top: 40px;
+        /* === КНОПКИ === */
+        .btn {
+            margin-top: 30px;
             padding: 16px 32px;
-            background-color: #007aff; /* Цвет кнопки как в iOS */
-            color: white;
             border: none;
             border-radius: 16px;
             font-size: 17px;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
-            transition: transform 0.1s, background-color 0.2s;
+            transition: all 0.2s;
             -webkit-tap-highlight-color: transparent;
+            width: 80%;
+            max-width: 300px;
         }
 
-        .draw-btn:active {
-            transform: scale(0.96);
-            background-color: #0056b3;
+        .btn-primary {
+            background-color: #007aff;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
         }
+
+        .btn-primary:active {
+            transform: scale(0.96);
+        }
+
+        .btn-disabled {
+            background-color: #e5e5ea;
+            color: #8e8e93;
+            cursor: default;
+            box-shadow: none;
+        }
+
+        .timer-display {
+            font-family: monospace;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="scene" onclick="flipCard()">
-        <div class="card" id="myCard">
-            <!-- Лицевая сторона -->
-            <div class="card__face card__face--front">
-                <img id="frontImg" src="" alt="">
-            </div>
-            <!-- Оборотная сторона -->
-            <div class="card__face card__face--back">
-                <img id="backImg" src="" alt="">
-            </div>
+    <!-- ЭКРАН ПРИВЕТСТВИЯ -->
+    <div id="welcome-screen">
+        <!-- СЮДА ВСТАВЬ ССЫЛКУ НА СВОЮ ГИФКУ ИЛИ КАРТИНКУ -->
+        <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHpydDhzaTZxbGw3azZ3eW1xcjNvb2FmdmJjY3drcTkxdWhzbG1mcyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/flqS9MxwSjkgdO5UCe/giphy.gif" class="welcome-gif" alt="Intro">
+        
+        <div class="welcome-text">
+            Сделай глубокий вдох и длинный выдох, повтори 3-4 цикла
+            Отпусти напряжение. Расслабь лицо и плечи. 
+            Когда услышишь тишину, вытаскивай карточку
+            Сфокусируйся на своем вопросе.<br>
+            Карта подскажет намерение на ближайшее время.<br>
+            Вспоминай о ней в течение дня.
         </div>
+        
+        <button class="btn btn-primary" onclick="startGame()">Синхронизироваться</button>
     </div>
 
-    <div class="instruction" id="hintText">Нажми на карту</div>
+    <!-- ОСНОВНОЙ ЭКРАН -->
+    <div id="game-screen">
+        <div class="scene" onclick="flipCard()">
+            <div class="card" id="myCard">
+                <div class="card__face card__face--front">
+                    <img id="frontImg" src="" alt="">
+                </div>
+                <div class="card__face card__face--back">
+                    <img id="backImg" src="" alt="">
+                </div>
+            </div>
+        </div>
 
-    <button class="draw-btn" onclick="drawNewCard()">Тянуть карту</button>
+        <div class="hint-text" id="hintText">нажми на карточку, чтобы перевернуть</div>
+
+        <!-- Кнопка действия -->
+        <button id="drawBtn" class="btn btn-primary" onclick="handleDrawClick()">тянуть карточку</button>
+        <div id="timerDisplay" class="hint-text timer-display"></div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
         // ==========================================
-        // НАСТРОЙКИ: ВОТ ЗДЕСЬ ТВОИ КАРТОЧКИ
+        // БАЗА КАРТ
         // ==========================================
-        
-        // Просто перечисли названия файлов. 
-        // Важно: Файлы должны лежать в папке img/
-        
         const cardsDatabase = [
-            { 
-                front: 'reshimost.jpg',      // Имя файла картинки-слова
-                back: 'reshimost_back.jpg'   // Имя файла картинки-описания/асаны
-            },
-            { 
-                front: 'zabota.jpg', 
-                back: 'zabota_back.jpg' 
-            },
-            { 
-                front: 'igrivost.jpg', 
-                back: 'igrivost_back.jpg' 
-            },
-             { 
-                front: 'disciplina.jpg', 
-                back: 'back1.jpg' 
-            },
-             { 
-                front: 'igrivost.jpg', 
-                back: 'igrivost_back.jpg' 
-            },
-             { 
-                front: 'estestven.jpg', 
-                back: 'back2.jpg' 
-            },
-             { 
-                front: 'odnorod.jpg', 
-                back: 'odnorod_back.jpg' 
-            },
-             { 
-                front: 'otvaga.jpg', 
-                back: 'back2.jpg' 
-            },
-             { 
-                front: 'samobyt.jpg', 
-                back: 'back2.jpg' 
-            },
-              { 
-                front: 'smelost.jpg', 
-                back: 'back2.jpg' 
-            },
-              { 
-                front: 'starat.jpg', 
-                back: 'back2.jpg' 
-            },
-            { 
-                front: 'uporstvo.jpg', 
-                back: 'back2.jpg' 
-            },
-            { 
-                front: 'vnimat.jpg', 
-                back: 'back2.jpg' 
-            },
-            { 
-                front: 'zabota.jpg', 
-                back: 'back2.jpg' 
-            }
-             ];  
-            // Скопируй блок { ... }, чтобы добавить следующую карту
-            // Не забудь запятую между блоками!
+            { front: 'reshimost.jpg', back: 'reshimost_back.jpg' },
+            { front: 'zabota.jpg', back: 'zabota_back.jpg' },
+            { front: 'igrivost.jpg', back: 'igrivost_back.jpg' },
+            { front: 'disciplina.jpg', back: 'back1.jpg' },
+            { front: 'igrivost.jpg', back: 'igrivost_back.jpg' },
+            { front: 'estestven.jpg', back: 'back2.jpg' },
+            { front: 'odnorod.jpg', back: 'odnorod_back.jpg' },
+            { front: 'otvaga.jpg', back: 'back2.jpg' },
+            { front: 'samobyt.jpg', back: 'back2.jpg' },
+            { front: 'smelost.jpg', back: 'back2.jpg' },
+            { front: 'starat.jpg', back: 'back2.jpg' },
+            { front: 'uporstvo.jpg', back: 'back2.jpg' },
+            { front: 'vnimat.jpg', back: 'back2.jpg' },
+            { front: 'zabota.jpg', back: 'back2.jpg'}
+        ];
 
-        // ==========================================
+        // НАСТРОЙКИ ВРЕМЕНИ (13.5 часов в миллисекундах)
+        const COOLDOWN_HOURS = 13.5;
+        const COOLDOWN_MS = COOLDOWN_HOURS * 60 * 60 * 1000; 
 
+        // Переменные
+        let currentCardIndex = -1;
         const cardElement = document.getElementById('myCard');
         const frontImg = document.getElementById('frontImg');
         const backImg = document.getElementById('backImg');
-        const hintText = document.getElementById('hintText');
+        const drawBtn = document.getElementById('drawBtn');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const gameScreen = document.getElementById('game-screen');
 
-        function drawNewCard() {
-            // Если карта перевернута, вернем её назад перед сменой
-            if (cardElement.classList.contains('is-flipped')) {
-                cardElement.classList.remove('is-flipped');
-                setTimeout(updateImages, 300); // Ждем пока перевернется
-            } else {
-                updateImages();
+        // === 1. ЛОГИКА СТАРТА ===
+        function startGame() {
+            // Скрываем приветствие
+            welcomeScreen.style.opacity = '0';
+            setTimeout(() => {
+                welcomeScreen.style.display = 'none';
+                gameScreen.style.display = 'flex';
+                // Небольшая задержка перед появлением
+                setTimeout(() => { gameScreen.style.opacity = '1'; }, 100);
+            }, 500);
+
+            // Проверяем состояние
+            checkState();
+        }
+
+        // === 2. ПРОВЕРКА СОСТОЯНИЯ (ПАМЯТЬ) ===
+        function checkState() {
+            const lastDrawTime = localStorage.getItem('lastDrawTime');
+            const savedCardIndex = localStorage.getItem('savedCardIndex');
+            const now = Date.now();
+
+            if (lastDrawTime && savedCardIndex !== null) {
+                const timePassed = now - parseInt(lastDrawTime);
+
+                if (timePassed < COOLDOWN_MS) {
+                    // ВРЕМЯ ЕЩЕ НЕ ПРИШЛО: Показываем СТАРУЮ карту
+                    loadCard(parseInt(savedCardIndex));
+                    lockButton(COOLDOWN_MS - timePassed);
+                    return;
+                }
+            }
+
+            // Если времени прошло достаточно или это первый раз
+            unlockButton();
+            // Показываем "рубашку" или заглушку (можно первую карту из колоды как превью)
+            // Но пока просто оставим пусто или загрузим случайную без сохранения
+            if (currentCardIndex === -1) {
+                // Если совсем пусто, покажем рандомную, но кнопку оставим активной
+                const demoIndex = goldenRatioRandom(cardsDatabase.length);
+                loadCard(demoIndex);
             }
         }
 
-        function updateImages() {
-            // Случайный выбор
-            const randomIndex = Math.floor(Math.random() * cardsDatabase.length);
-            const selectedPair = cardsDatabase[randomIndex];
-
-            // Подставляем пути к картинкам
-            // Внимание: здесь указана папка 'img/'
-            frontImg.src = 'img/' + selectedPair.front;
-            backImg.src = 'img/' + selectedPair.back;
+        // === 3. РАНДОМ ПО ЗОЛОТОМУ СЕЧЕНИЮ ===
+        function goldenRatioRandom(max) {
+            // ФИЛОСОФИЯ: Берем текущий момент времени и умножаем на число Бога (Phi)
+            const phi = 1.618033988749895;
+            const now = Date.now();
             
-            // Если вдруг картинка не прогрузилась (опечатка), выведем ошибку в консоль
-            frontImg.onerror = function() { console.error("Не найдена картинка: " + this.src) };
+            // Получаем дробную часть от произведения времени на Phi
+            // Это создает "хаотичное", но детерминированное число от 0 до 1
+            const randomVal = (now * phi) % 1; 
+
+            return Math.floor(randomVal * max);
+        }
+
+        // === 4. ТЯНЕМ КАРТУ ===
+        function handleDrawClick() {
+            // Если кнопка заблокирована (класс disabled), ничего не делаем
+            if (drawBtn.classList.contains('btn-disabled')) return;
+
+            // 1. Выбираем новую карту
+            const newIndex = goldenRatioRandom(cardsDatabase.length);
+            
+            // 2. Анимация (если карта уже была перевернута, вернем назад)
+            if (cardElement.classList.contains('is-flipped')) {
+                cardElement.classList.remove('is-flipped');
+                setTimeout(() => {
+                    performDraw(newIndex);
+                }, 300);
+            } else {
+                performDraw(newIndex);
+            }
+        }
+
+        function performDraw(index) {
+            loadCard(index);
+            
+            // 3. СОХРАНЯЕМ В ПАМЯТЬ
+            localStorage.setItem('savedCardIndex', index);
+            localStorage.setItem('lastDrawTime', Date.now());
+
+            // 4. Блокируем кнопку
+            lockButton(COOLDOWN_MS);
+        }
+
+        // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ===
+        
+        function loadCard(index) {
+            currentCardIndex = index;
+            const card = cardsDatabase[index];
+            frontImg.src = 'img/' + card.front;
+            backImg.src = 'img/' + card.back;
         }
 
         function flipCard() {
             cardElement.classList.toggle('is-flipped');
-            
-            // Меняем текст подсказки
-            if (cardElement.classList.contains('is-flipped')) {
-                hintText.innerText = "Нажми еще раз, чтобы закрыть";
-            } else {
-                hintText.innerText = "Нажми на карту, чтобы перевернуть";
-            }
         }
 
-        // Запуск первой карты при старте
-        drawNewCard();
+        // Блокировка кнопки и запуск таймера
+        function lockButton(remainingTime) {
+            drawBtn.innerText = "Карта выбрана";
+            drawBtn.classList.add('btn-disabled');
+            drawBtn.classList.remove('btn-primary');
+            
+            updateTimer(remainingTime);
+            
+            // Обновляем таймер каждую секунду
+            const interval = setInterval(() => {
+                remainingTime -= 1000;
+                if (remainingTime <= 0) {
+                    clearInterval(interval);
+                    unlockButton();
+                } else {
+                    updateTimer(remainingTime);
+                }
+            }, 1000);
+        }
+
+        function updateTimer(ms) {
+            const hours = Math.floor(ms / (1000 * 60 * 60));
+            const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+            timerDisplay.innerText = `Новая карта доступна через: ${hours}ч ${minutes}м`;
+        }
+
+        function unlockButton() {
+            drawBtn.innerText = "Тянуть карту";
+            drawBtn.classList.remove('btn-disabled');
+            drawBtn.classList.add('btn-primary');
+            timerDisplay.innerText = "";
+        }
 
     </script>
 </body>
