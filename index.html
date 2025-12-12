@@ -129,6 +129,9 @@
             color: #8e8e93;
             font-size: 14px;
             text-align: center;
+            /* НОВОЕ: Скрываем текст по умолчанию */
+            opacity: 0; 
+            transition: opacity 0.5s;
         }
 
         /* === КНОПКИ === */
@@ -266,11 +269,13 @@
                 setTimeout(() => { gameScreen.style.opacity = '1'; }, 100);
             }, 500);
             }
-            // === 2. ПРОВЕРКА СОСТОЯНИЯ (ПАМЯТЬ + МАГИЯ 3 СЕКУНД) ===
+           // === 2. ПРОВЕРКА СОСТОЯНИЯ (ПАМЯТЬ + МАГИЯ 3 СЕКУНД) ===
         function checkState() {
             const lastDrawTime = localStorage.getItem('lastDrawTime');
             const savedCardIndex = localStorage.getItem('savedCardIndex');
             const now = Date.now();
+            // Получаем доступ к тексту подсказки
+            const hintText = document.getElementById('hintText');
 
             // СЦЕНАРИЙ 1: Карта уже вытянута и таймер тикает
             if (lastDrawTime && savedCardIndex !== null) {
@@ -280,6 +285,9 @@
                     // Время не вышло: Сразу показываем карту пользователя
                     loadCard(parseInt(savedCardIndex));
                     lockButton(COOLDOWN_MS - timePassed);
+                    
+                    // ВАЖНО: Если карта уже есть, показываем текст
+                    hintText.style.opacity = '1';
                     return; 
                 }
             }
@@ -287,12 +295,14 @@
             // СЦЕНАРИЙ 2: Можно тянуть новую (первый раз или таймер истек)
             unlockButton();
             
-            // Но мы не показываем карту сразу! Мы включаем режим "Прелюдии"
+            // ВАЖНО: Скрываем текст подсказки во время настройки
+            hintText.style.opacity = '0';
             
-            // 1. Ставим заглушку (Узор/Магию)
-            // Убедись, что файл cover.jpg лежит в папке img!
-            frontImg.src = 'img/mandala.jpg'; 
-            backImg.src = 'img/mandala.jpg'; 
+            // 1. Ставим заглушку (Узор/Магию) ПО ТВОЕЙ ССЫЛКЕ
+            const mandalaUrl = 'https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZzd3YnFwcXRnODU1eGJya3N0ODg2anp6M3U2dzJhbWNnbWw2aGJzMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Pu1SRAVyJJnF70sU3r/giphy.gif';
+            
+            frontImg.src = mandalaUrl; 
+            backImg.src = mandalaUrl; 
 
             // 2. Блокируем кнопку на 3 секунды
             const originalText = "Тянуть карту";
@@ -348,6 +358,13 @@
 
         function performDraw(index) {
             loadCard(index);
+            localStorage.setItem('savedCardIndex', index);
+            localStorage.setItem('lastDrawTime', Date.now());
+            lockButton(COOLDOWN_MS);
+            
+            // НОВОЕ: Показываем текст подсказки
+            document.getElementById('hintText').style.opacity = '1';
+        }
             
             // 3. СОХРАНЯЕМ В ПАМЯТЬ
             localStorage.setItem('savedCardIndex', index);
