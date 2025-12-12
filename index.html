@@ -268,6 +268,8 @@
                 // Небольшая задержка перед появлением
                 setTimeout(() => { gameScreen.style.opacity = '1'; }, 100);
             }, 500);
+            // ВАЖНО: Запускаем логику игры
+            checkState();
             }
            // === 2. ПРОВЕРКА СОСТОЯНИЯ (ПАМЯТЬ + МАГИЯ 3 СЕКУНД) ===
         function checkState() {
@@ -349,8 +351,7 @@
             if (cardElement.classList.contains('is-flipped')) {
                 cardElement.classList.remove('is-flipped');
                 setTimeout(() => {
-                    performDraw(newIndex);
-                }, 300);
+                    performDraw(newIndex); }, 300);
             } else {
                 performDraw(newIndex);
             }
