@@ -51,7 +51,7 @@
         .welcome-text {
             font-size: 13px;
             line-height: 1.6;
-            color: #FFCCBC;
+            color: #00796B;
             max-width: 320px;
             margin-bottom: 30px;
         }
@@ -264,36 +264,52 @@
                 setTimeout(() => { gameScreen.style.opacity = '1'; }, 100);
             }, 500);
 
-            // Проверяем состояние
-            checkState();
-        }
-
-        // === 2. ПРОВЕРКА СОСТОЯНИЯ (ПАМЯТЬ) ===
+            // === 2. ПРОВЕРКА СОСТОЯНИЯ (ПАМЯТЬ + МАГИЯ 3 СЕКУНД) ===
         function checkState() {
             const lastDrawTime = localStorage.getItem('lastDrawTime');
             const savedCardIndex = localStorage.getItem('savedCardIndex');
             const now = Date.now();
 
+            // СЦЕНАРИЙ 1: Карта уже вытянута и таймер тикает
             if (lastDrawTime && savedCardIndex !== null) {
                 const timePassed = now - parseInt(lastDrawTime);
 
                 if (timePassed < COOLDOWN_MS) {
-                    // ВРЕМЯ ЕЩЕ НЕ ПРИШЛО: Показываем СТАРУЮ карту
+                    // Время не вышло: Сразу показываем карту пользователя
                     loadCard(parseInt(savedCardIndex));
                     lockButton(COOLDOWN_MS - timePassed);
-                    return;
+                    return; 
                 }
             }
 
-            // Если времени прошло достаточно или это первый раз
+            // СЦЕНАРИЙ 2: Можно тянуть новую (первый раз или таймер истек)
             unlockButton();
-            // Показываем "рубашку" или заглушку (можно первую карту из колоды как превью)
-            // Но пока просто оставим пусто или загрузим случайную без сохранения
-            if (currentCardIndex === -1) {
-                // Если совсем пусто, покажем рандомную, но кнопку оставим активной
-                const demoIndex = goldenRatioRandom(cardsDatabase.length);
-                loadCard(demoIndex);
-            }
+            
+            // Но мы не показываем карту сразу! Мы включаем режим "Прелюдии"
+            
+            // 1. Ставим заглушку (Узор/Магию)
+            // Убедись, что файл cover.jpg лежит в папке img!
+            frontImg.src = 'img/mandala.jpg'; 
+            backImg.src = 'img/mandala.jpg'; 
+
+            // 2. Блокируем кнопку на 3 секунды
+            const originalText = "Тянуть карту";
+            
+            drawBtn.classList.add('btn-disabled'); // Делаем серой
+            drawBtn.classList.remove('btn-primary');
+            drawBtn.innerText = "Настройка..."; // Пишем текст ожидания
+            
+            // Отключаем клик по кнопке (визуально и программно)
+            drawBtn.style.pointerEvents = 'none'; 
+
+            // 3. Таймер на 3 секунды
+            setTimeout(() => {
+                // Включаем кнопку обратно
+                drawBtn.classList.remove('btn-disabled');
+                drawBtn.classList.add('btn-primary');
+                drawBtn.innerText = originalText;
+                drawBtn.style.pointerEvents = 'auto'; 
+            }, 3000); // 3000 миллисекунд = 3 секунды
         }
 
         // === 3. РАНДОМ ПО ЗОЛОТОМУ СЕЧЕНИЮ ===
