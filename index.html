@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     
-    <title>Карты Намерений</title>
+    <title>Карты Атрибутов</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -431,13 +431,15 @@
         ];
 
         // --- НАСТРОЙКИ ВРЕМЕНИ И РЕЖИМОВ ---
-        // Стандарт: 12 часов
-        const STANDARD_COOLDOWN_MS = 12 * 60 * 60 * 1000; 
         
-        // Промо (simvol): 3 карты за 8 часов
+        // СТАНДАРТ: 1 карта за 12.5 часов
+        const STANDARD_COOLDOWN_MS = 12.5 * 60 * 60 * 1000; 
+        const STANDARD_LIMIT_COUNT = 1; 
+        
+        // ПРОМО (simvol): 2 карты за 12.5 часов
         const PROMO_CODE_VALUE = "simvol";
-        const PROMO_COOLDOWN_MS = 8 * 60 * 60 * 1000;
-        const PROMO_LIMIT_COUNT = 3;
+        const PROMO_COOLDOWN_MS = 12.5 * 60 * 60 * 1000;
+        const PROMO_LIMIT_COUNT = 2;
 
         // Переменные
         let currentCardIndex = -1;
@@ -462,7 +464,6 @@
                 setTimeout(() => { gameScreen.style.opacity = '1'; }, 100);
             }, 500);
             
-            // Проверяем, активен ли промокод при старте
             updatePromoUI();
             checkState();
         }
@@ -470,52 +471,52 @@
         // === 2. ПРОВЕРКА СОСТОЯНИЯ ===
         function checkState() {
             const now = Date.now();
-            const lastDrawTime = localStorage.getItem('lastDrawTime'); // Для стандарта
             const savedCardIndex = localStorage.getItem('savedCardIndex');
             
-            // Получаем историю вытягиваний для ПРОМО режима
-            let drawHistory = JSON.parse(localStorage.getItem('drawHistory') || '[]');
-            
-            // Определяем, активен ли промокод
             const isPromo = localStorage.getItem('isPromoActive') === 'true';
 
-            // ЛОГИКА БЛОКИРОВКИ
             let isLocked = false;
             let timeRemaining = 0;
 
             if (isPromo) {
-                // --- РЕЖИМ ПРОМО (3 карты за 8 часов) ---
-                // Оставляем только те записи, что были менее 8 часов назад
+                // --- РЕЖИМ ПРОМО (2 карты / 12.5 часов) ---
+                let drawHistory = JSON.parse(localStorage.getItem('drawHistory') || '[]');
                 drawHistory = drawHistory.filter(time => (now - time) < PROMO_COOLDOWN_MS);
                 localStorage.setItem('drawHistory', JSON.stringify(drawHistory));
 
                 if (drawHistory.length >= PROMO_LIMIT_COUNT) {
                     isLocked = true;
-                    // Время до разблокировки самой старой карты
                     const oldestDraw = Math.min(...drawHistory);
                     timeRemaining = PROMO_COOLDOWN_MS - (now - oldestDraw);
                 }
             } else {
-                // --- СТАНДАРТНЫЙ РЕЖИМ (1 карта за 12 часов) ---
-                if (lastDrawTime) {
-                    const timePassed = now - parseInt(lastDrawTime);
-                    if (timePassed < STANDARD_COOLDOWN_MS) {
-                        isLocked = true;
-                        timeRemaining = STANDARD_COOLDOWN_MS - timePassed;
-                    }
+                // --- СТАНДАРТНЫЙ РЕЖИМ (1 карта / 12.5 часов) ---
+                let stdHistory = JSON.parse(localStorage.getItem('standardDrawHistory') || '[]');
+                
+                // Миграция старых данных
+                const oldLastDraw = localStorage.getItem('lastDrawTime');
+                if (oldLastDraw && stdHistory.length === 0) {
+                    stdHistory.push(parseInt(oldLastDraw));
+                    localStorage.removeItem('lastDrawTime');
+                }
+
+                // Фильтр по времени (12.5 часов)
+                stdHistory = stdHistory.filter(time => (now - time) < STANDARD_COOLDOWN_MS);
+                localStorage.setItem('standardDrawHistory', JSON.stringify(stdHistory));
+
+                // Лимит = 1
+                if (stdHistory.length >= STANDARD_LIMIT_COUNT) {
+                    isLocked = true;
+                    const oldestDraw = Math.min(...stdHistory);
+                    timeRemaining = STANDARD_COOLDOWN_MS - (now - oldestDraw);
                 }
             }
 
-            // ПРИМЕНЯЕМ РЕШЕНИЕ
             if (isLocked) {
-                // Если заблокировано - показываем последнюю сохраненную карту
                 if (savedCardIndex !== null) loadCard(parseInt(savedCardIndex));
-                
                 lockButton(timeRemaining);
                 hintText.style.opacity = '1';
-                
             } else {
-                // Если доступно - запускаем прелюдию (Мандала)
                 unlockButton();
                 hintText.style.opacity = '0';
                 
@@ -523,7 +524,6 @@
                 frontImg.src = mandalaUrl; 
                 backImg.src = mandalaUrl; 
 
-                // Блокировка и Дыхание
                 const originalText = "вытащить новую карточку";
                 drawBtn.classList.add('btn-disabled'); 
                 drawBtn.classList.remove('btn-primary');
@@ -565,41 +565,40 @@
             loadCard(index);
             const now = Date.now();
 
-            // 1. Сохраняем "текущую" карту (визуально)
             localStorage.setItem('savedCardIndex', index);
-            
-            // 2. Сохраняем в КОЛЛЕКЦИЮ
             addToCollection(index);
             
-            // 3. ОБНОВЛЯЕМ ТАЙМЕРЫ (В зависимости от режима)
             const isPromo = localStorage.getItem('isPromoActive') === 'true';
             
             if (isPromo) {
-                // Добавляем запись в историю
+                // === ПРОМО ===
                 let drawHistory = JSON.parse(localStorage.getItem('drawHistory') || '[]');
                 drawHistory.push(now);
+                drawHistory = drawHistory.filter(time => (now - time) < PROMO_COOLDOWN_MS);
                 localStorage.setItem('drawHistory', JSON.stringify(drawHistory));
                 
-                // Проверяем, исчерпан ли лимит (3 шт)
-                // Фильтруем старые записи
-                drawHistory = drawHistory.filter(time => (now - time) < PROMO_COOLDOWN_MS);
-                
                 if (drawHistory.length >= PROMO_LIMIT_COUNT) {
-                     // Блокируем на время до освобождения слота
                      const oldestDraw = Math.min(...drawHistory);
-                     const timeRemaining = PROMO_COOLDOWN_MS - (now - oldestDraw);
-                     lockButton(timeRemaining);
+                     lockButton(PROMO_COOLDOWN_MS - (now - oldestDraw));
                 } else {
-                    // Если лимит не исчерпан, просто показываем карту, кнопку не лочим
-                    // Но меняем текст, чтобы было понятно
                     const left = PROMO_LIMIT_COUNT - drawHistory.length;
                     drawBtn.innerText = `Можно вытянуть ещё: ${left}`;
                 }
 
             } else {
-                // Стандартный режим
-                localStorage.setItem('lastDrawTime', now);
-                lockButton(STANDARD_COOLDOWN_MS);
+                // === СТАНДАРТ ===
+                let stdHistory = JSON.parse(localStorage.getItem('standardDrawHistory') || '[]');
+                stdHistory.push(now);
+                stdHistory = stdHistory.filter(time => (now - time) < STANDARD_COOLDOWN_MS);
+                localStorage.setItem('standardDrawHistory', JSON.stringify(stdHistory));
+                
+                if (stdHistory.length >= STANDARD_LIMIT_COUNT) {
+                     const oldestDraw = Math.min(...stdHistory);
+                     lockButton(STANDARD_COOLDOWN_MS - (now - oldestDraw));
+                } else {
+                    const left = STANDARD_LIMIT_COUNT - stdHistory.length;
+                    drawBtn.innerText = `Можно вытянуть ещё: ${left}`;
+                }
             }
 
             hintText.style.opacity = '1';
@@ -613,11 +612,11 @@
             const inputField = document.getElementById('promoInput');
             
             if (isPromo) {
-                statusDiv.innerText = "✅ Режим '3 карты / 8 часов' активен";
+                statusDiv.innerText = "✅ Режим '2 карты / 12.5 часов' активен";
                 inputField.value = PROMO_CODE_VALUE;
                 inputField.disabled = true;
             } else {
-                statusDiv.innerText = "Стандарт: 1 карта / 12 часов";
+                statusDiv.innerText = "Стандарт: 1 карта / 12.5 часов";
             }
         }
 
@@ -627,12 +626,11 @@
             
             if (input === PROMO_CODE_VALUE) {
                 localStorage.setItem('isPromoActive', 'true');
-                alert("Код принят! Включен режим: 3 карты каждые 8 часов.");
+                alert("Код принят! Включен режим: 2 карты каждые 12.5 часов.");
                 updatePromoUI();
                 
-                // Сразу проверяем состояние (вдруг уже можно тянуть)
-                unlockButton(); // Сбрасываем визуально
-                checkState();   // Пересчитываем права
+                unlockButton(); 
+                checkState();   
             } else {
                 statusDiv.innerText = "❌ Неверный код";
                 setTimeout(() => { updatePromoUI(); }, 2000);
@@ -678,7 +676,6 @@
                     img.src = 'img/' + card.front;
                     item.appendChild(img);
                     
-                    // КНОПКА СКАЧИВАНИЯ
                     const downloadBtn = document.createElement('div');
                     downloadBtn.className = 'download-mini-btn';
                     downloadBtn.innerHTML = '⬇️'; 
@@ -722,7 +719,6 @@
             drawBtn.classList.remove('btn-primary');
             updateTimer(remainingTime);
             
-            // Если таймер уже был запущен, очищаем его, чтобы не дублировать
             if (window.activeInterval) clearInterval(window.activeInterval);
 
             window.activeInterval = setInterval(() => {
@@ -760,7 +756,7 @@
 
             if (tapCount >= 7) {
                 localStorage.clear(); 
-                alert("🛠 Сброс таймера");
+                alert("🛠 Полный сброс");
                 location.reload(); 
             }
         });
