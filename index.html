@@ -146,18 +146,21 @@
             transform: rotateY(180deg);
         }
 
-        .card__face {
+      .card__face {
             position: absolute;
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            
+            /* ИЗМЕНЕНИЕ: Делаем фон белым и возвращаем тень контейнеру */
+            background-color: white;
+            border-radius: 20px; /* Скругление углов самой "бумажки" */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15); /* Тень от всей карты */
+            
             display: flex;
             align-items: center;
             justify-content: center;
-            background: transparent;
-            overflow: hidden;
+            overflow: hidden; /* Чтобы картинка не вылезала за скругленные углы */
         }
 
         .card__face--back {
@@ -171,8 +174,10 @@
             display: block;
             
             /* НОВОЕ: Скругляем углы самой картинке и добавляем тень к ней */
-            border-radius: 15px; 
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
+            /* border-radius: 15px; */
+            border-radius: 0;
+            filter: none; 
+               /*filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));*/
         }
 
         .hint-text {
