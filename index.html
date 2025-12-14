@@ -383,6 +383,16 @@
 
         <button id="drawBtn" class="btn btn-primary" onclick="handleDrawClick()">взять направление</button>
         <div id="timerDisplay" class="timer-display"></div>
+        <!-- 2. ИГРОВОЙ ЭКРАН -->
+    <div id="game-screen">
+        <!-- ... (кнопка коллекции, сцена, хинт, кнопка действия) ... -->
+        
+        <button id="drawBtn" class="btn btn-primary" onclick="handleDrawClick()">взять направление</button>
+        <div id="timerDisplay" class="timer-display"></div>
+
+        <!-- ДОБАВИТЬ ВОТ ЭТУ СТРОЧКУ НИЖЕ: -->
+        <div id="versionLabel" style="margin-top: 20px; font-size: 10px; color: #aaa; opacity: 0.5;">v 1.0</div>
+    </div>
     </div>
 
     <!-- 3. ЭКРАН КОЛЛЕКЦИИ -->
@@ -770,16 +780,21 @@
         }
 
         // Секретный сброс (7 кликов)
+        // Секретный сброс (7 кликов по версии внизу)
         let tapCount = 0;
         let tapTimer = null;
-        timerDisplay.addEventListener('click', function() {
+        
+        // Ищем элемент с версией
+        const versionLabel = document.getElementById('versionLabel');
+
+        versionLabel.addEventListener('click', function() {
             tapCount++;
             clearTimeout(tapTimer);
             tapTimer = setTimeout(() => { tapCount = 0; }, 500);
 
             if (tapCount >= 7) {
                 localStorage.clear(); 
-                alert("🛠 Полный сброс");
+                alert("🛠 Сброс полного кэша");
                 location.reload(); 
             }
         });
