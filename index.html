@@ -11,6 +11,7 @@
     
     <title>Карты Атрибутов</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
     <style>
         body {
             margin: 0;
@@ -24,7 +25,7 @@
             color: #333;
         }
 
-        /* === ВЕРХНЯЯ ПАНЕЛЬ ИГРЫ (Кнопки) === */
+        /* === ВЕРХНЯЯ ПАНЕЛЬ ИГРЫ (Задача 2) === */
         .top-bar {
             position: absolute;
             top: 20px;
@@ -39,8 +40,8 @@
 
         .round-btn {
             pointer-events: auto;
-            width: 40px; /* Уменьшенный размер */
-            height: 40px;
+            width: 44px;
+            height: 44px;
             background-color: white;
             border: none;
             border-radius: 50%; /* Круглые */
@@ -51,7 +52,7 @@
             cursor: pointer;
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
             transition: transform 0.2s;
-            text-decoration: none; /* Для ссылок */
+            text-decoration: none;
         }
 
         .round-btn:active { transform: scale(0.9); }
@@ -68,11 +69,12 @@
             -webkit-tap-highlight-color: transparent;
             width: 80%;
             max-width: 300px;
-            margin: 10px auto; 
+            margin: 10px auto;
         }
 
+        /* ВОЗВРАЩЕН СИНИЙ ЦВЕТ */
         .btn-primary {
-            background-color: #00796B;
+            background-color: #007aff;
             color: white;
             box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
         }
@@ -86,10 +88,9 @@
             box-shadow: none;
         }
 
-        /* === МАРКЕРЫ ВЫДЕЛЕНИЯ (Хайлайты) === */
-        /* Настроил приятные цвета под фон #E0F7FA */
+        /* === МАРКЕРЫ (ВОССТАНОВЛЕНЫ) === */
         .m-orange {
-            background-color: #FFCCBC; /* Персиковый */
+            background-color: #FFE0B2;
             padding: 0 4px;
             border-radius: 4px;
             box-decoration-break: clone;
@@ -97,7 +98,7 @@
         }
         
         .m-purple {
-            background-color: #E1BEE7; /* Нежно-фиолетовый */
+            background-color: #E1BEE7;
             padding: 0 4px;
             border-radius: 4px;
             box-decoration-break: clone;
@@ -105,7 +106,7 @@
         }
         
         .m-green {
-            background-color: #C8E6C9; /* Мятный */
+            background-color: #C8E6C9;
             padding: 0 4px;
             border-radius: 4px;
             box-decoration-break: clone;
@@ -150,17 +151,19 @@
         
         .ob-text p { margin-bottom: 20px; }
 
-        /* АНИМАЦИЯ ПОЯВЛЕНИЯ ТЕКСТА */
+        /* === АНИМАЦИЯ ТЕКСТА (ЭТОГО НЕ ХВАТАЛО) === */
         .ob-slide.active .anim-text {
             opacity: 0;
             display: inline;
             animation: textFadeIn 0.8s ease forwards;
         }
 
-        /* Тайминги задержки */
+        /* Задержки */
         .d-0 { animation-delay: 0.1s; }
         .d-10 { animation-delay: 1.0s; }
+        .d-15 { animation-delay: 1.5s; }
         .d-20 { animation-delay: 2.0s; }
+        .d-25 { animation-delay: 2.5s; }
         .d-30 { animation-delay: 3.0s; }
         .d-40 { animation-delay: 4.0s; }
 
@@ -234,7 +237,7 @@
         .hint-text { margin-top: 15px; color: #8e8e93; font-size: 14px; text-align: center; opacity: 0; transition: opacity 0.5s; }
         .timer-display { font-family: monospace; font-size: 13px; margin-top: 5px; color: #555; min-height: 20px; }
 
-        /* === ЭКРАН КОЛЛЕКЦИИ === */
+        /* === ЭКРАН КОЛЛЕКЦИИ (Задача 3) === */
         #collection-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: #E0F7FA; z-index: 15;
@@ -249,7 +252,7 @@
         .collection-title { font-size: 20px; font-weight: 600; color: #00796B; }
         .collection-subtitle { font-size: 12px; color: #777; margin-bottom: 20px; line-height: 1.4; }
 
-        /* Панель кнопок в коллекции */
+        /* Меню действий в коллекции */
         .collection-actions {
             display: flex;
             align-items: center;
@@ -261,8 +264,8 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             background-color: white;
             border-radius: 50%;
             color: #00796B;
@@ -270,6 +273,23 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             border: none;
             cursor: pointer;
+            position: relative;
+        }
+        
+        /* Тултип (подсказка) */
+        .action-btn-small:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            white-space: nowrap;
+            pointer-events: none;
         }
 
         .promo-box { background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -298,60 +318,94 @@
     </style>
 </head>
 <body>
-   <!-- ОНБОРДИНГ (10 СЛАЙДОВ) -->
-    <!-- ОНБОРДИНГ (С АНИМАЦИЕЙ И ЦВЕТОМ) -->
+    <!-- ОНБОРДИНГ (Текст строго как ты прислал) -->
     <div id="onboarding-screen">
         
         <!-- Слайд 1 -->
         <div class="ob-slide active" id="ob-slide-1">
             <div class="ob-text">
-                <p><span class="anim-text d-0">Это набор духовных направляющих.</span></p>
-                <p><span class="anim-text d-10">Каждая карточка описывает <span class="m-orange">добродетель</span>, которая рассматривается как <span class="m-orange">атрибут человеческой Души</span>.</span></p>
-                <p><span class="anim-text d-30">Эти карточки — <span class="m-orange">подходящий инструмент</span> для тех, кто ищет не рациональные стратегии, а <span class="m-purple">глубокие внутренние трансформации</span> и стремится к состоянию <span class="m-orange">гармонии</span>.</span></p>
+                <p>
+                    <span class="anim-text d-0">Это набор карточек <span class="m-green">для медитации</span>,</span>
+                    <br><br>
+                    <span class="anim-text d-10">для развития <span class="m-green">осознанности</span>, <span class="m-green">селф-коучинга</span> и <span class="m-green">самоисследования</span></span>
+                </p>
             </div>
         </div>
 
         <!-- Слайд 2 -->
         <div class="ob-slide" id="ob-slide-2">
             <div class="ob-text">
-                <p><span class="anim-text d-0">Вытаскивай карточку в начале дня или вечером,</span></p>
-                <p><span class="anim-text d-10">когда можешь <span class="m-green">уделить себе хотя бы 5 минут</span>,</span></p>
-                <p><span class="anim-text d-20">как если бы ничего кроме тебя не существовало.</span></p>
+                <p><span class="anim-text d-0">Карточки — <span class="m-green">подходящий инструмент</span> для тех, кто ищет не рациональные стратегии,</span></p>
+                <p><span class="anim-text d-15">а <span class="m-orange">глубокие внутренние трансформации</span></span></p>
+                <p><span class="anim-text d-25">и стремится к состоянию <span class="m-green">гармонии</span></span></p>
             </div>
         </div>
 
         <!-- Слайд 3 -->
         <div class="ob-slide" id="ob-slide-3">
             <div class="ob-text">
-                <p><span class="anim-text d-0">Прочти короткую фразу на оборотной стороне карточки. Это указатель направления.</span></p>
-                <p><span class="anim-text d-10">Поразмышляй, визуализируй или медитируй, фокусируясь на возникшем образе, мысли, идее или состоянии.</span></p>
-                <p><span class="anim-text d-30">Разворачивай содержимое, используя собственный контекст — исследуй, изучай, проникай глубже, расширяй.</span></p>
+                <p><span class="anim-text d-0">Каждая карточка описывает <span class="m-purple">добродетель</span>,</span></p>
+                <p><span class="anim-text d-10">которая подразумевается как <span class="m-purple">аспект человеческой Души</span></span></p>
             </div>
         </div>
 
         <!-- Слайд 4 -->
         <div class="ob-slide" id="ob-slide-4">
             <div class="ob-text">
-                <p><span class="anim-text d-0">Если практикуешь <span class="m-orange">йогу</span> —</span></p>
-                <p><span class="anim-text d-10">выполни предложенные асаны или выбери свои,</span></p>
-                <p><span class="anim-text d-20">чтобы <span class="m-orange">воплотить в реальность</span> полученное состояние через ощущение в теле.</span></p>
+                <p><span class="anim-text d-0">Вытаскивай карточку в начале дня или вечером,</span></p>
+                <p><span class="anim-text d-10">когда можешь <span class="m-green"> уделить 5 минут полностью себе</span></span></p>
             </div>
         </div>
 
         <!-- Слайд 5 -->
         <div class="ob-slide" id="ob-slide-5">
             <div class="ob-text">
-                <p><span class="anim-text d-0">Возвращайся к карточке и прожитому опыту в течении дня и любой подходящей ситуации.</span></p>
-                <p><span class="anim-text d-20">Я лично рекомендую рефлексировать в дневник или <span class="m-purple">делать заметки</span>, если еще не делаешь этого.</span></p>
-                <p><span class="anim-text d-40">Используй вытянутую карточку в течении нескольких дней или пока актуально. Возвращайся в бот по зову сердца!</span></p>
+                <p><span class="anim-text d-0">Прочти короткую фразу на оборотной стороне карточки</span></p>
+                <p><span class="anim-text d-10">Это <span class="m-orange">указатель направления</span> мысли</span></p>
             </div>
         </div>
 
         <!-- Слайд 6 -->
         <div class="ob-slide" id="ob-slide-6">
             <div class="ob-text">
-                <p><span class="anim-text d-0">Используйте данное руководство только лишь как вектор.</span></p>
-                <p><span class="anim-text d-10">Как и по какому пути идти — ты решаешь сам!</span></p>
+                <p><span class="anim-text d-0">Поразмышляй, визуализируй или <span class="m-purple">медитируй</span>,</span></p>
+                <p><span class="anim-text d-15">фокусируясь на мысли, идее, образе или состоянии</span></p>
+            </div>
+        </div>
+
+        <!-- Слайд 7 -->
+        <div class="ob-slide" id="ob-slide-7">
+            <div class="ob-text">
+                <p><span class="anim-text d-0"><span class="m-green">Разворачивай мысль</span>, используя личные ситуации —</span></p>
+                <p><span class="anim-text d-15">расширяй, <span class="m-green">проникай глубже</span>, исследуй, изучай</span></p>
+            </div>
+        </div>
+
+        <!-- Слайд 8 -->
+        <div class="ob-slide" id="ob-slide-8">
+            <div class="ob-text">
+                <p><span class="anim-text d-0">Если практикуешь йогу — <span class="m-orange">выполни предложенные асаны</span> или выбери свои,</span></p>
+                <p><span class="anim-text d-20">чтобы <span class="m-orange">воплотить в реальность</span> полученное состояние</span></p>
+            </div>
+        </div>
+
+        <!-- Слайд 9 -->
+        <div class="ob-slide" id="ob-slide-9">
+            <div class="ob-text">
+                <p><span class="anim-text d-0">Возвращайся к карточке и прожитому опыту <span class="m-purple">в течении дня</span> и любой подходящей ситуации</span></p>
+                <p><span class="anim-text d-20">Будет круто <span class="m-purple">рефлексировать и делать заметки</span> в блокноте</span></p>
+            </div>
+        </div>
+
+        <!-- Слайд 10 -->
+        <div class="ob-slide" id="ob-slide-10">
+            <div class="ob-text">
+                <p><span class="anim-text d-0"><span class="m-purple">Сделай скриншот</span> или скачай карту на телефон и обращайся к ней в любой момент</span></p>
+                <br>
+                <p><span class="anim-text d-15">Используй вытянутую карточку столько времени, сколько посчитаешь нужным</span></p>
+                <br>
+                <p><span class="anim-text d-30">Это лишь мои рекомендации, чтобы задать вектор</span></p>
+                <p><span class="anim-text d-40"><span class="m-green">Как и каким путем идти — решать тебе!</span></span></p>
             </div>
         </div>
 
@@ -364,10 +418,15 @@
                 <div class="ob-dot" id="dot-4"></div>
                 <div class="ob-dot" id="dot-5"></div>
                 <div class="ob-dot" id="dot-6"></div>
+                <div class="ob-dot" id="dot-7"></div>
+                <div class="ob-dot" id="dot-8"></div>
+                <div class="ob-dot" id="dot-9"></div>
+                <div class="ob-dot" id="dot-10"></div>
             </div>
             <button class="btn btn-primary" onclick="nextOnboardingStep()" id="ob-next-btn">Далее</button>
         </div>
     </div>
+
     <!-- 1. ЭКРАН ПРИВЕТСТВИЯ -->
     <div id="welcome-screen">
         <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHpydDhzaTZxbGw3azZ3eW1xcjNvb2FmdmJjY3drcTkxdWhzbG1mcyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/flqS9MxwSjkgdO5UCe/giphy.gif" class="welcome-gif" alt="Intro">
@@ -381,10 +440,9 @@
     </div>
 
     <!-- 2. ИГРОВОЙ ЭКРАН -->
-    <!-- 2. ИГРОВОЙ ЭКРАН -->
     <div id="game-screen">
         
-        <!-- ВЕРХНЯЯ ПАНЕЛЬ КНОПОК -->
+        <!-- ВЕРХНЯЯ ПАНЕЛЬ (Задача 2) -->
         <div class="top-bar">
             <!-- Слева: Книжка (Коллекция) -->
             <button class="round-btn" onclick="openCollection()" aria-label="Коллекция">
@@ -427,14 +485,13 @@
     </div>
 
     <!-- 3. ЭКРАН КОЛЛЕКЦИИ -->
-   <!-- 3. ЭКРАН КОЛЛЕКЦИИ -->
     <div id="collection-screen">
         <div class="collection-header">
             <div class="collection-title">Мои карты</div>
             <button onclick="closeCollection()" style="background:none; border:none; font-size:24px; color:#555;">✕</button>
         </div>
         
-        <!-- Меню действий в коллекции -->
+        <!-- МЕНЮ ДЕЙСТВИЙ (Задача 3) -->
         <div class="collection-actions">
             <!-- Слева: Открыть заметки -->
             <a href="mobilenotes://" class="action-btn-small" title="Открыть заметки">
