@@ -24,27 +24,37 @@
             color: #333;
         }
 
-        /* === КНОПКА КОЛЛЕКЦИИ (ВЕРХНИЙ УГОЛ) === */
-        .collection-btn-corner {
+        /* === ВЕРХНЯЯ ПАНЕЛЬ ИГРЫ (Кнопки) === */
+        .top-bar {
             position: absolute;
             top: 20px;
+            left: 20px;
             right: 20px;
-            width: 44px;
-            height: 44px;
+            z-index: 30;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none; /* Чтобы клики проходили сквозь пустоту */
+        }
+
+        .round-btn {
+            pointer-events: auto;
+            width: 40px; /* Уменьшенный размер */
+            height: 40px;
             background-color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 50%; /* Круглые */
             color: #00796B;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            z-index: 30;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
             transition: transform 0.2s;
-            -webkit-tap-highlight-color: transparent;
+            text-decoration: none; /* Для ссылок */
         }
-        .collection-btn-corner:active { transform: scale(0.9); }
+
+        .round-btn:active { transform: scale(0.9); }
 
         /* === ОБЩИЕ КНОПКИ === */
         .btn {
@@ -58,18 +68,16 @@
             -webkit-tap-highlight-color: transparent;
             width: 80%;
             max-width: 300px;
-            margin: 10px auto; /* Центрируем */
+            margin: 10px auto; 
         }
 
         .btn-primary {
-            background-color: #007aff;
+            background-color: #00796B;
             color: white;
             box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
         }
 
-        .btn-primary:active {
-            transform: scale(0.96);
-        }
+        .btn-primary:active { transform: scale(0.96); }
 
         .btn-disabled {
             background-color: #B0BEC5;
@@ -78,9 +86,10 @@
             box-shadow: none;
         }
 
-        /* Цвета маркеров */
+        /* === МАРКЕРЫ ВЫДЕЛЕНИЯ (Хайлайты) === */
+        /* Настроил приятные цвета под фон #E0F7FA */
         .m-orange {
-            background-color: #FFE0B2; /* Морковный/Персиковый */
+            background-color: #FFCCBC; /* Персиковый */
             padding: 0 4px;
             border-radius: 4px;
             box-decoration-break: clone;
@@ -88,7 +97,7 @@
         }
         
         .m-purple {
-            background-color: #E1BEE7; /* Фиолетовый */
+            background-color: #E1BEE7; /* Нежно-фиолетовый */
             padding: 0 4px;
             border-radius: 4px;
             box-decoration-break: clone;
@@ -96,13 +105,14 @@
         }
         
         .m-green {
-            background-color: #C8E6C9; /* Зеленый/Мятный */
+            background-color: #C8E6C9; /* Мятный */
             padding: 0 4px;
             border-radius: 4px;
             box-decoration-break: clone;
             -webkit-box-decoration-break: clone;
         }
-        /* === ОНБОРДИНГ (НОВЫЙ БЛОК) === */
+
+        /* === ОНБОРДИНГ === */
         #onboarding-screen {
             position: absolute;
             top: 0;
@@ -110,8 +120,8 @@
             width: 100%;
             height: 100%;
             background-color: #E0F7FA;
-            z-index: 50; /* Самый верхний слой */
-            display: none; /* Скрыт, пока JS не решит показать */
+            z-index: 50;
+            display: none; 
             flex-direction: column;
             justify-content: space-between;
             padding: 30px 20px;
@@ -121,28 +131,42 @@
 
         .ob-slide {
             flex: 1;
-            display: none; /* Слайды скрыты */
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            animation: fadeIn 0.5s;
         }
         
-        .ob-slide.active {
-            display: flex;
-        }
+        .ob-slide.active { display: flex; }
 
         .ob-text {
-            font-size: 20px; /* Крупный текст */
-            line-height: 1.5;
+            font-size: 20px;
+            line-height: 1.6;
             color: #004D40;
             font-weight: 400;
             max-width: 340px;
         }
         
-        .ob-text p {
-            margin-bottom: 20px;
+        .ob-text p { margin-bottom: 20px; }
+
+        /* АНИМАЦИЯ ПОЯВЛЕНИЯ ТЕКСТА */
+        .ob-slide.active .anim-text {
+            opacity: 0;
+            display: inline;
+            animation: textFadeIn 0.8s ease forwards;
+        }
+
+        /* Тайминги задержки */
+        .d-0 { animation-delay: 0.1s; }
+        .d-10 { animation-delay: 1.0s; }
+        .d-20 { animation-delay: 2.0s; }
+        .d-30 { animation-delay: 3.0s; }
+        .d-40 { animation-delay: 4.0s; }
+
+        @keyframes textFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .ob-controls {
@@ -153,71 +177,19 @@
             margin-bottom: 20px;
         }
 
-        .ob-dots {
-            display: flex;
-            gap: 8px;
-        }
-        
+        .ob-dots { display: flex; gap: 8px; }
         .ob-dot {
-            width: 10px;
-            height: 10px;
+            width: 10px; height: 10px;
             border-radius: 50%;
             background-color: #B2DFDB;
             transition: background-color 0.3s;
         }
-        
-        .ob-dot.active {
-            background-color: #00796B;
-        }
+        .ob-dot.active { background-color: #00796B; }
 
-        /* --- Анимация текста в онбординге --- */
-        
-        /* === ГИБКАЯ АНИМАЦИЯ ЗАДЕРЖКИ === */
-        
-        /* Базовое состояние текста */
-        .ob-slide.active .anim-text {
-            opacity: 0;
-            display: inline; /* Важно, чтобы хайлайты не ломались */
-            animation: textFadeIn 0.8s ease forwards;
-            line-height: 1.6;
-        }
-
-        /* Классы задержки (d-05 = 0.5 сек, d-20 = 2.0 сек и т.д.) */
-        /* Меняй эти значения, если хочешь ускорить/замедлить */
-        .d-0 { animation-delay: 0.1s; }  /* Сразу */
-        .d-05 { animation-delay: 0.5s; } /* Пауза 0.5 сек */
-        .d-10 { animation-delay: 1.0s; } /* Пауза 1 сек */
-        .d-15 { animation-delay: 1.5s; } 
-        .d-20 { animation-delay: 2.0s; } /* Пауза 2 сек */
-        .d-25 { animation-delay: 2.5s; }
-        .d-30 { animation-delay: 3.0s; } /* Пауза 3 сек */
-        .d-40 { animation-delay: 4.0s; } /* Долгая пауза */
-
-        @keyframes textFadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        }
-
-        /* Сама анимация появления */
-        @keyframes textFadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
         /* === ЭКРАН ПРИВЕТСТВИЯ === */
         #welcome-screen {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: #B2EBF2;
             z-index: 20;
             display: flex;
@@ -230,27 +202,14 @@
             transition: opacity 0.5s;
         }
 
-        .welcome-gif {
-            width: 170px;
-            height: auto;
-            margin-bottom: 20px;
-            border-radius: 10px;
-        }
-
-        .welcome-text {
-            font-size: 13px;
-            line-height: 1.6;
-            color: #00796B;
-            max-width: 320px;
-            margin-bottom: 30px;
-        }
+        .welcome-gif { width: 170px; height: auto; margin-bottom: 20px; border-radius: 10px; }
+        .welcome-text { font-size: 13px; line-height: 1.6; color: #00796B; max-width: 320px; margin-bottom: 30px; }
         .welcome-text p { margin: 0 0 15px 0; padding: 0; }
         .welcome-text p:last-child { margin-bottom: 0; }
 
         /* === ИГРОВАЯ СЦЕНА === */
         #game-screen {
-            flex: 1;
-            display: none;
+            flex: 1; display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -259,389 +218,152 @@
             position: relative;
         }
 
-        .scene {
-            width: 300px;
-            height: 66px;
-            perspective: 1000px;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-
-        .card {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform-style: preserve-3d;
-        }
-
-        .card.is-flipped {
-            transform: rotateY(180deg);
-        }
-
-      .card__face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
+        .scene { width: 300px; height: 66px; perspective: 1000px; cursor: pointer; margin-bottom: 20px; }
+        .card { width: 100%; height: 100%; position: relative; transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d; }
+        .card.is-flipped { transform: rotateY(180deg); }
+        .card__face {
+            position: absolute; width: 100%; height: 100%;
             backface-visibility: hidden;
-            
-            /* ИЗМЕНЕНИЕ: Делаем фон белым и возвращаем тень контейнеру */
-            background-color: E0F7FA;
-            border-radius: 200px; /* Скругление углов самой "бумажки" */
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15); /* Тень от всей карты */
-            
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden; /* Чтобы картинка не вылезала за скругленные углы */
+            background-color: #E0F7FA;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
-
-        .card__face--back {
-            transform: rotateY(180deg);
-        }
-
-        img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* Картинка влезает целиком */
-            display: block;
-            
-            /* НОВОЕ: Скругляем углы самой картинке и добавляем тень к ней */
-            /* border-radius: 15px; */
-            border-radius: 0;
-            filter: none; 
-               /*filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));*/
-        }
-
-        .hint-text {
-            margin-top: 15px;
-            color: #8e8e93;
-            font-size: 14px;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-
-        .timer-display {
-            font-family: monospace;
-            font-size: 13px;
-            margin-top: 5px;
-            color: #555;
-            min-height: 20px;
-        }
+        .card__face--back { transform: rotateY(180deg); }
+        img { width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 0; }
+        .hint-text { margin-top: 15px; color: #8e8e93; font-size: 14px; text-align: center; opacity: 0; transition: opacity 0.5s; }
+        .timer-display { font-family: monospace; font-size: 13px; margin-top: 5px; color: #555; min-height: 20px; }
 
         /* === ЭКРАН КОЛЛЕКЦИИ === */
         #collection-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #E0F7FA;
-            z-index: 15;
-            display: none; /* Скрыто по умолчанию */
-            flex-direction: column;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: auto; /* Прокрутка */
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #E0F7FA; z-index: 15;
+            display: none; flex-direction: column;
+            padding: 20px; box-sizing: border-box; overflow-y: auto;
         }
 
         .collection-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px;
+        }
+        .collection-title { font-size: 20px; font-weight: 600; color: #00796B; }
+        .collection-subtitle { font-size: 12px; color: #777; margin-bottom: 20px; line-height: 1.4; }
+
+        /* Панель кнопок в коллекции */
+        .collection-actions {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 5px; /* Уменьшил отступ */
-        }
-
-        .collection-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #00796B;
-        }
-
-        /* Пояснение про скачивание */
-        .collection-subtitle {
-            font-size: 12px;
-            color: #777;
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
-
-        /* Блок ввода промокода */
-        .promo-box {
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        .promo-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #00796B;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .promo-input-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .promo-input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        .promo-btn {
-            background-color: #00796B;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .promo-status {
-            font-size: 12px;
-            margin-top: 5px;
-            color: #00796B;
-            height: 15px;
-        }
-
-        /* Сетка коллекции */
-        .collection-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3 колонки */
             gap: 15px;
-            padding-bottom: 40px;
+            margin-bottom: 20px;
         }
 
-        .collection-item {
-            aspect-ratio: 16/9; 
-            background-color: #B0BEC5; 
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: rgba(255,255,255,0.5);
-            position: relative;
-            overflow: hidden;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
-        
-        .collection-item.unlocked {
-            background-color: E0F7FA;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            cursor: pointer;
-        }
-        
-        .collection-item.unlocked img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .collection-item:active {
-            transform: scale(0.95);
-        }
-
-        /* Кнопка скачивания */
-        .download-mini-btn {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-            width: 32px;
-            height: 32px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            z-index: 5;
-            font-size: 16px;
-        }
-/* === ОБНОВЛЕННАЯ КНОПКА КОЛЛЕКЦИИ С ПОДПИСЬЮ === */
-        .collection-wrapper {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 30;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            /* Чтобы при нажатии на текст тоже срабатывало */
-        }
-
-        /* Обновляем старый класс кнопки, убирая позиционирование, 
-           так как теперь позиционируется wrapper */
-        .collection-btn-corner {
-            position: relative; /* Было absolute */
-            top: auto; right: auto; /* Сбрасываем координаты */
-            width: 44px;
-            height: 44px;
-            background-color: white;
-            border: none;
-            border-radius: 12px;
-            color: #00796B;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            transition: transform 0.2s;
-        }
-
-        .collection-label-text {
-            margin-top: 5px;
-            font-size: 10px;
-            font-weight: 700;
-            color: #00796B;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
-        }
-
-        .collection-wrapper:active .collection-btn-corner {
-            transform: scale(0.9);
-        }
-
-        /* Кнопка заметок */
-        .notes-btn {
+        .action-btn-small {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            background-color: #FFD54F; /* Желтый цвет заметок */
-            color: #5D4037;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: white;
+            border-radius: 50%;
+            color: #00796B;
             text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 20px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             border: none;
             cursor: pointer;
         }
+
+        .promo-box { background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .promo-label { font-size: 14px; font-weight: 600; color: #00796B; margin-bottom: 8px; display: block; }
+        .promo-input-group { display: flex; gap: 10px; }
+        .promo-input { flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; font-family: inherit; }
+        .promo-btn { background-color: #00796B; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+        .promo-status { font-size: 12px; margin-top: 5px; color: #00796B; height: 15px; }
+
+        .collection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding-bottom: 40px; }
+        .collection-item {
+            aspect-ratio: 16/9; background-color: #B0BEC5; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; color: rgba(255,255,255,0.5); position: relative;
+            overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); transition: transform 0.2s;
+        }
+        .collection-item.unlocked { background-color: #E0F7FA; box-shadow: 0 4px 8px rgba(0,0,0,0.1); cursor: pointer; }
+        .collection-item.unlocked img { width: 100%; height: 100%; object-fit: contain; }
+        .collection-item:active { transform: scale(0.95); }
+        .download-mini-btn {
+            position: absolute; bottom: 5px; right: 5px; width: 32px; height: 32px;
+            background: rgba(255, 255, 255, 0.9); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 5; font-size: 16px;
+        }
     </style>
 </head>
 <body>
-<!-- ОНБОРДИНГ (ИСПРАВЛЕННАЯ НУМЕРАЦИЯ) -->
    <!-- ОНБОРДИНГ (10 СЛАЙДОВ) -->
+    <!-- ОНБОРДИНГ (С АНИМАЦИЕЙ И ЦВЕТОМ) -->
     <div id="onboarding-screen">
         
         <!-- Слайд 1 -->
         <div class="ob-slide active" id="ob-slide-1">
             <div class="ob-text">
-                <p>
-                    <span class="anim-text d-0">Это набор карточек <span class="h-cyan">для медитации</span>,</span>
-                    <br><br>
-                    <span class="anim-text d-10">для развития <span class="h-cyan">осознанности</span>, <span class="h-cyan">селф-коучинга</span> и <span class="h-mint">самоисследования</span>.</span>
-                </p>
+                <p><span class="anim-text d-0">Это набор духовных направляющих.</span></p>
+                <p><span class="anim-text d-10">Каждая карточка описывает <span class="m-orange">добродетель</span>, которая рассматривается как <span class="m-orange">атрибут человеческой Души</span>.</span></p>
+                <p><span class="anim-text d-30">Эти карточки — <span class="m-orange">подходящий инструмент</span> для тех, кто ищет не рациональные стратегии, а <span class="m-purple">глубокие внутренние трансформации</span> и стремится к состоянию <span class="m-orange">гармонии</span>.</span></p>
             </div>
         </div>
 
         <!-- Слайд 2 -->
         <div class="ob-slide" id="ob-slide-2">
             <div class="ob-text">
-                <p><span class="anim-text d-0">Карточки — <span class="h-cyan">подходящий инструмент</span> для тех, кто ищет не рациональные стратегии,</span></p>
-                <p><span class="anim-text d-15">а <span class="h-peach">глубокие внутренние трансформации</span></span></p>
-                <p><span class="anim-text d-25">и стремится к состоянию <span class="h-cyan">гармонии</span>.</span></p>
+                <p><span class="anim-text d-0">Вытаскивай карточку в начале дня или вечером,</span></p>
+                <p><span class="anim-text d-10">когда можешь <span class="m-green">уделить себе хотя бы 5 минут</span>,</span></p>
+                <p><span class="anim-text d-20">как если бы ничего кроме тебя не существовало.</span></p>
             </div>
         </div>
 
         <!-- Слайд 3 -->
         <div class="ob-slide" id="ob-slide-3">
             <div class="ob-text">
-                <p><span class="anim-text d-0">Каждая карточка описывает <span class="h-pink">добродетель</span>,</span></p>
-                <p><span class="anim-text d-10">которая подразумевается как <span class="h-pink">аспект человеческой Души</span>.</span></p>
+                <p><span class="anim-text d-0">Прочти короткую фразу на оборотной стороне карточки. Это указатель направления.</span></p>
+                <p><span class="anim-text d-10">Поразмышляй, визуализируй или медитируй, фокусируясь на возникшем образе, мысли, идее или состоянии.</span></p>
+                <p><span class="anim-text d-30">Разворачивай содержимое, используя собственный контекст — исследуй, изучай, проникай глубже, расширяй.</span></p>
             </div>
         </div>
 
         <!-- Слайд 4 -->
         <div class="ob-slide" id="ob-slide-4">
             <div class="ob-text">
-                <p><span class="anim-text d-0">Вытаскивай карточку в начале дня или вечером,</span></p>
-                <p><span class="anim-text d-10">когда можешь <span class="h-mint">полностью уделить себе 5 минут</span>.</span></p>
+                <p><span class="anim-text d-0">Если практикуешь <span class="m-orange">йогу</span> —</span></p>
+                <p><span class="anim-text d-10">выполни предложенные асаны или выбери свои,</span></p>
+                <p><span class="anim-text d-20">чтобы <span class="m-orange">воплотить в реальность</span> полученное состояние через ощущение в теле.</span></p>
             </div>
         </div>
 
         <!-- Слайд 5 -->
         <div class="ob-slide" id="ob-slide-5">
             <div class="ob-text">
-                <p><span class="anim-text d-0">Прочти короткую фразу на оборотной стороне карточки.</span></p>
-                <p><span class="anim-text d-10">Это <span class="h-peach">указатель направления</span> мысли.</span></p>
+                <p><span class="anim-text d-0">Возвращайся к карточке и прожитому опыту в течении дня и любой подходящей ситуации.</span></p>
+                <p><span class="anim-text d-20">Я лично рекомендую рефлексировать в дневник или <span class="m-purple">делать заметки</span>, если еще не делаешь этого.</span></p>
+                <p><span class="anim-text d-40">Используй вытянутую карточку в течении нескольких дней или пока актуально. Возвращайся в бот по зову сердца!</span></p>
             </div>
         </div>
 
         <!-- Слайд 6 -->
         <div class="ob-slide" id="ob-slide-6">
             <div class="ob-text">
-                <p><span class="anim-text d-0">Поразмышляй, визуализируй или <span class="h-pink">медитируй</span>,</span></p>
-                <p><span class="anim-text d-15">фокусируясь на мысли, идее, образе или состоянии.</span></p>
+                <p><span class="anim-text d-0">Используйте данное руководство только лишь как вектор.</span></p>
+                <p><span class="anim-text d-10">Как и по какому пути идти — ты решаешь сам!</span></p>
             </div>
         </div>
 
-        <!-- Слайд 7 -->
-        <div class="ob-slide" id="ob-slide-7">
-            <div class="ob-text">
-                <p><span class="anim-text d-0"><span class="h-cyan">Разворачивай мысль</span>, используя личные ситуации —</span></p>
-                <p><span class="anim-text d-15">расширяй, <span class="h-cyan">проникай глубже</span>, исследуй, изучай.</span></p>
-            </div>
-        </div>
-
-        <!-- Слайд 8 -->
-        <div class="ob-slide" id="ob-slide-8">
-            <div class="ob-text">
-                <p><span class="anim-text d-0">Если практикуешь йогу — <span class="h-peach">выполни предложенные асаны</span> или выбери свои,</span></p>
-                <p><span class="anim-text d-20">чтобы <span class="h-peach">воплотить в реальность</span> полученное состояние.</span></p>
-            </div>
-        </div>
-
-        <!-- Слайд 9 -->
-        <div class="ob-slide" id="ob-slide-9">
-            <div class="ob-text">
-                <p><span class="anim-text d-0">Возвращайся к карточке и прожитому опыту <span class="h-pink">в течении дня</span> и любой подходящей ситуации.</span></p>
-                <p><span class="anim-text d-20">Будет круто <span class="h-pink">рефлексировать и делать заметки</span> в блокноте.</span></p>
-            </div>
-        </div>
-
-        <!-- Слайд 10 -->
-        <div class="ob-slide" id="ob-slide-10">
-            <div class="ob-text">
-                <p><span class="anim-text d-0"><span class="h-pink">Сделай скриншот</span> или скачай карту на телефон и обращайся к ней в любой момент.</span></p>
-                <br>
-                <p><span class="anim-text d-15">Используй вытянутую карточку столько времени, сколько посчитаешь нужным.</span></p>
-                <br>
-                <p><span class="anim-text d-30">Это лишь мои рекомендации, чтобы задать вектор.</span></p>
-                <p><span class="anim-text d-40"><span class="h-cyan">Как и каким путем идти — решать тебе!</span></span></p>
-            </div>
-        </div>
-
-        <!-- Навигация (Точки) -->
+        <!-- Навигация -->
         <div class="ob-controls">
             <div class="ob-dots">
-                <!-- 10 точек -->
                 <div class="ob-dot active" id="dot-1"></div>
                 <div class="ob-dot" id="dot-2"></div>
                 <div class="ob-dot" id="dot-3"></div>
                 <div class="ob-dot" id="dot-4"></div>
                 <div class="ob-dot" id="dot-5"></div>
                 <div class="ob-dot" id="dot-6"></div>
-                <div class="ob-dot" id="dot-7"></div>
-                <div class="ob-dot" id="dot-8"></div>
-                <div class="ob-dot" id="dot-9"></div>
-                <div class="ob-dot" id="dot-10"></div>
             </div>
             <button class="btn btn-primary" onclick="nextOnboardingStep()" id="ob-next-btn">Далее</button>
         </div>
@@ -659,22 +381,32 @@
     </div>
 
     <!-- 2. ИГРОВОЙ ЭКРАН -->
+    <!-- 2. ИГРОВОЙ ЭКРАН -->
     <div id="game-screen">
         
-        <!-- НОВАЯ КНОПКА КОЛЛЕКЦИИ (ВЕРХНИЙ ПРАВЫЙ УГОЛ) -->
-       <!-- КНОПКА КОЛЛЕКЦИИ С ПОДПИСЬЮ -->
-        <div class="collection-wrapper" onclick="openCollection()">
-            <div class="collection-btn-corner">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="14" width="7" height="7"></rect>
-                    <rect x="3" y="14" width="7" height="7"></rect>
+        <!-- ВЕРХНЯЯ ПАНЕЛЬ КНОПОК -->
+        <div class="top-bar">
+            <!-- Слева: Книжка (Коллекция) -->
+            <button class="round-btn" onclick="openCollection()" aria-label="Коллекция">
+                <!-- SVG Книжка -->
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                 </svg>
-            </div>
-            <div class="collection-label-text">Коллекция</div>
+            </button>
+
+            <!-- Справа: Блокнот (Заметки) -->
+            <a href="mobilenotes://" class="round-btn" aria-label="Открыть заметки">
+                <!-- SVG Блокнот -->
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+            </a>
         </div>
-        </button>
 
         <div class="scene" onclick="flipCard()">
             <div class="card" id="myCard">
@@ -691,30 +423,42 @@
 
         <button id="drawBtn" class="btn btn-primary" onclick="handleDrawClick()">взять направление</button>
         <div id="timerDisplay" class="timer-display"></div>
-        <!-- ДОБАВИТЬ ВОТ ЭТУ СТРОЧКУ НИЖЕ: -->
         <div id="versionLabel" style="margin-top: 20px; font-size: 10px; color: #aaa; opacity: 0.5;">v 1.0</div>
-    </div>
     </div>
 
     <!-- 3. ЭКРАН КОЛЛЕКЦИИ -->
+   <!-- 3. ЭКРАН КОЛЛЕКЦИИ -->
     <div id="collection-screen">
         <div class="collection-header">
             <div class="collection-title">Мои карты</div>
             <button onclick="closeCollection()" style="background:none; border:none; font-size:24px; color:#555;">✕</button>
         </div>
         
-        <!-- Пояснение про скачивание -->
+        <!-- Меню действий в коллекции -->
+        <div class="collection-actions">
+            <!-- Слева: Открыть заметки -->
+            <a href="mobilenotes://" class="action-btn-small" title="Открыть заметки">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+            </a>
+
+            <!-- Справа: Связаться (Телеграм) -->
+            <a href="https://t.me/neuro25" target="_blank" class="action-btn-small" title="Задать вопрос / Связаться">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9.78 18.65l.28-4.23l7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3L3.64 12c-.88-.25-.89-.86.2-1.08l11.1-4.07c.71-.26 1.36.22 1.15.94l-1.89 9.12c-.2 1.02-.83 1.28-1.7 0.77L9.78 18.65z"/>
+                </svg>
+            </a>
+        </div>
+
         <div class="collection-subtitle">
             Чтобы сохранить карту, нажми на значок ⬇️ в углу карточки.
             Картинка откроется в браузере — сохрани её как фото.
         </div>
-<!-- Кнопка перехода в Заметки -->
-        <div style="display: flex; justify-content: center; width: 100%;">
-            <a href="mobilenotes://" class="notes-btn">
-                📝 Открыть Заметки
-            </a>
-        </div>
-        <!-- Блок Промокода (Режима) -->
+
         <div class="promo-box">
             <span class="promo-label">секретный режим</span>
             <div class="promo-input-group">
@@ -724,9 +468,7 @@
             <div id="promoStatus" class="promo-status"></div>
         </div>
 
-        <div class="collection-grid" id="collectionGrid">
-            <!-- Сюда скрипт сам добавит квадратики -->
-        </div>
+        <div class="collection-grid" id="collectionGrid"></div>
     </div>
 
     <script>
