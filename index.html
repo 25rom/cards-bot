@@ -540,20 +540,46 @@
         <div class="collection-grid" id="collectionGrid"></div>
     </div>
 
-    <script>
-        // Функция для отправки цели в Метрику
-    // Замени XXXXXXXX на номер твоего счетчика (он есть в коде Яндекса)
-    function trackEvent(eventName) {
-        if (window.ym) {
-            window.ym(105895834, 'reachGoal', eventName);
-            console.log('Событие отправлено:', eventName);
-        }
-    }
-        
+<script>
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.setHeaderColor('#E0F7FA');
         tg.setBackgroundColor('#E0F7FA');
+
+        // === АНАЛИТИКА ===
+        
+        // 1. Отправка событий
+        function trackEvent(eventName) {
+            if (window.ym) {
+                // ID твоего счетчика
+                window.ym(105895834, 'reachGoal', eventName); 
+                console.log('Metrika Event:', eventName);
+            }
+        }
+
+        // 2. Определение пользователя
+        function identifyUser() {
+            // Проверяем, есть ли данные от Телеграма
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+                const user = window.Telegram.WebApp.initDataUnsafe.user;
+                
+                const userInfo = {
+                    UserID: user.id,
+                    Username: user.username ? user.username : "No Username",
+                    Name: user.first_name,
+                    Language: user.language_code
+                };
+
+                console.log("User identified:", userInfo);
+
+                // Отправляем в Метрику
+                if (window.ym) {
+                    window.ym(105895834, 'userParams', userInfo);
+                }
+            } else {
+                console.log("User NOT identified (Not in Telegram or hidden)");
+            }
+        }
 
         // ==========================================
         // БАЗА КАРТ
@@ -595,6 +621,7 @@
         const PROMO_CODE_VALUE = "simvol";
         const PROMO_COOLDOWN_MS = 12.5 * 60 * 60 * 1000;
         const PROMO_LIMIT_COUNT = 2;
+        const GOD_CODE_VALUE = "godmode";
 
         // Переменные
         let currentCardIndex = -1;
@@ -609,39 +636,25 @@
         const gameScreen = document.getElementById('game-screen');
         const collectionScreen = document.getElementById('collection-screen');
         const collectionGrid = document.getElementById('collectionGrid');
-
-        // === ЛОГИКА ОНБОРДИНГА (ОБНОВЛЕННАЯ) ===
-        let currentObStep = 1;
-        const totalObSteps = 10;
         const obScreen = document.getElementById('onboarding-screen');
 
-        // Переменные для свайпа
+        // === ЛОГИКА ОНБОРДИНГА ===
+        let currentObStep = 1;
+        const totalObSteps = 10;
+        
         let touchStartX = 0;
         let touchEndX = 0;
 
-        // Слушаем касания экрана
-        obScreen.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-        });
-
+        obScreen.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
         obScreen.addEventListener('touchend', e => {
             touchEndX = e.changedTouches[0].screenX;
             handleSwipe();
         });
 
-        // Обработка свайпа
         function handleSwipe() {
-            const threshold = 50; // Минимальное расстояние для считывания свайпа
-            
-            if (touchEndX < touchStartX - threshold) {
-                // Свайп ВЛЕВО (Следующий слайд)
-                nextOnboardingStep();
-            }
-            
-            if (touchEndX > touchStartX + threshold) {
-                // Свайп ВПРАВО (Предыдущий слайд)
-                prevOnboardingStep();
-            }
+            const threshold = 50;
+            if (touchEndX < touchStartX - threshold) nextOnboardingStep();
+            if (touchEndX > touchStartX + threshold) prevOnboardingStep();
         }
 
         function checkFirstLaunch() {
@@ -654,39 +667,24 @@
         }
 
         function nextOnboardingStep() {
-            // Если это последний слайд — завершаем
             if (currentObStep >= totalObSteps) {
                 completeOnboarding();
                 return;
             }
-
-            // Скрываем текущий
             document.getElementById(`ob-slide-${currentObStep}`).classList.remove('active');
             document.getElementById(`dot-${currentObStep}`).classList.remove('active');
-            
-            // Идем вперед
             currentObStep++;
-
-            // Показываем следующий
             updateSlideView();
         }
 
         function prevOnboardingStep() {
-            // Если это первый слайд — назад идти некуда
             if (currentObStep <= 1) return;
-
-            // Скрываем текущий
             document.getElementById(`ob-slide-${currentObStep}`).classList.remove('active');
             document.getElementById(`dot-${currentObStep}`).classList.remove('active');
-
-            // Идем назад
             currentObStep--;
-
-            // Показываем предыдущий
             updateSlideView();
         }
 
-        // Вспомогательная функция отрисовки (чтобы не дублировать код)
         function updateSlideView() {
             const nextSlide = document.getElementById(`ob-slide-${currentObStep}`);
             const nextDot = document.getElementById(`dot-${currentObStep}`);
@@ -695,7 +693,6 @@
             nextSlide.classList.add('active');
             nextDot.classList.add('active');
 
-            // Меняем текст кнопки на последнем слайде
             if (currentObStep === totalObSteps) {
                 nextBtn.innerText = "Понятно";
             } else {
@@ -705,52 +702,32 @@
 
         function completeOnboarding() {
             localStorage.setItem('onboardingDone', 'true');
+            trackEvent('onboarding_finish');
             obScreen.style.opacity = '0';
             setTimeout(() => {
                 obScreen.style.display = 'none';
                 startGameSequence();
             }, 500);
-            trackEvent('onboarding_finish');
         }
-
-        function identifyUser() {
-        // Проверяем, есть ли данные от Телеграма
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-            
-            const user = window.Telegram.WebApp.initDataUnsafe.user;
-            
-            // Формируем данные
-            const userInfo = {
-                UserID: user.id,           // Уникальный ID (12345678)
-                Username: user.username,   // @username
-                Name: user.first_name,     // Имя
-                Language: user.language_code // Язык
-            };
-
-            console.log("User identified:", userInfo);
-
-            // Отправляем в Метрику как "Параметры визита"
-            // ВАЖНО: Замени XXXXXXXX на номер твоего счетчика!
-            if (window.ym) {
-                window.ym(XXXXXXXX, 'userParams', userInfo);
-            }
-        }
-    }
         
-       function startGameSequence() {
-             // === АНАЛИТИКА ===
-             trackEvent('main_screen_opened'); 
-             
-             // Идентифицируем пользователя (см. пункт 3 ниже)
-             identifyUser(); 
-
+        // === ПОДГОТОВКА ЭКРАНА ПРИВЕТСТВИЯ ===
+        function startGameSequence() {
+             // Открываем экран "Вдох-Выдох"
              welcomeScreen.style.display = 'flex';
              setTimeout(() => { welcomeScreen.style.opacity = '1'; }, 100);
-             checkState();
+             
+             // Идентифицируем юзера (отправляем данные в метрику)
+             identifyUser();
+             
+             // ВАЖНО: Мы НЕ запускаем checkState() здесь, чтобы не триггерить анимацию кнопок раньше времени.
+             // checkState() запустится только после нажатия на кнопку "СО-НАСТРОИТЬСЯ".
         }
-        
-        // === 1. ЗАГРУЗКА И СТАРТ (По кнопке "Со-настроиться") ===
+
+        // === СТАРТ ИГРЫ (Клик по кнопке "СО-НАСТРОИТЬСЯ") ===
         function startGame() {
+            trackEvent('main_screen_opened'); // Фиксируем вход в саму игру
+            
+            // Плавный переход
             welcomeScreen.style.opacity = '0';
             setTimeout(() => {
                 welcomeScreen.style.display = 'none';
@@ -759,20 +736,23 @@
             }, 500);
             
             updatePromoUI();
-            checkState();
+            checkState(); // ВОТ ТЕПЕРЬ запускаем логику таймеров и анимации
         }
 
-        // === 2. ПРОВЕРКА СОСТОЯНИЯ ===
         function checkState() {
             const now = Date.now();
             const savedCardIndex = localStorage.getItem('savedCardIndex');
-            
             const isPromo = localStorage.getItem('isPromoActive') === 'true';
+            const isGod = localStorage.getItem('isGodModeActive') === 'true';
 
             let isLocked = false;
             let timeRemaining = 0;
 
-            if (isPromo) {
+            if (isGod) {
+                isLocked = false;
+                timerDisplay.innerText = "⚡ БЕЗЛИМИТ";
+            } 
+            else if (isPromo) {
                 let drawHistory = JSON.parse(localStorage.getItem('drawHistory') || '[]');
                 drawHistory = drawHistory.filter(time => (now - time) < PROMO_COOLDOWN_MS);
                 localStorage.setItem('drawHistory', JSON.stringify(drawHistory));
@@ -781,6 +761,9 @@
                     isLocked = true;
                     const oldestDraw = Math.min(...drawHistory);
                     timeRemaining = PROMO_COOLDOWN_MS - (now - oldestDraw);
+                } else {
+                    const left = PROMO_LIMIT_COUNT - drawHistory.length;
+                    timerDisplay.innerText = `Доступно еще: ${left}`;
                 }
             } else {
                 let stdHistory = JSON.parse(localStorage.getItem('standardDrawHistory') || '[]');
@@ -796,14 +779,19 @@
                     isLocked = true;
                     const oldestDraw = Math.min(...stdHistory);
                     timeRemaining = STANDARD_COOLDOWN_MS - (now - oldestDraw);
+                } else {
+                    const left = STANDARD_LIMIT_COUNT - stdHistory.length;
+                    timerDisplay.innerText = `Доступно еще: ${left}`;
                 }
             }
 
             if (isLocked) {
+                // Если заблокировано - сразу показываем карту
                 if (savedCardIndex !== null) loadCard(parseInt(savedCardIndex));
                 lockButton(timeRemaining);
                 hintText.style.opacity = '1';
             } else {
+                // Если доступно - запускаем ПРЕЛЮДИЮ
                 unlockButton();
                 hintText.style.opacity = '0';
                 
@@ -816,20 +804,21 @@
                 drawBtn.classList.remove('btn-primary');
                 drawBtn.style.pointerEvents = 'none'; 
 
+                // Анимация текста на кнопке (Тайминг)
                 drawBtn.innerText = "Настройка..."; 
-                drawBtn.innerText = "Вдох...";
-                setTimeout(() => { drawBtn.innerText = "Выдох..."; }, 2000);
-                setTimeout(() => { drawBtn.innerText = "Синхрония..."; }, 3000);
+                
+                setTimeout(() => { drawBtn.innerText = "Вдох..."; }, 1000);
+                setTimeout(() => { drawBtn.innerText = "Выдох..."; }, 3000);
+                setTimeout(() => { drawBtn.innerText = "Синхрония..."; }, 6000);
                 setTimeout(() => {
                     drawBtn.classList.remove('btn-disabled');
                     drawBtn.classList.add('btn-primary');
                     drawBtn.innerText = originalText;
                     drawBtn.style.pointerEvents = 'auto'; 
-                }, 6000); 
+                }, 10000); 
             }
         }
 
-        // === 3. МЕХАНИКА ===
         function goldenRatioRandom(max) {
             const phi = 1.618033988749895;
             const now = Date.now();
@@ -849,11 +838,8 @@
         }
 
         function performDraw(index) {
-            // === АНАЛИТИКА: ЖУЧОК ===
-            // Отправляем событие, что карта вытянута
             trackEvent('card_drawn'); 
-            // Отправляем конкретный номер/название карты (для статистики популярности)
-            trackEvent('card_index_' + index);
+            trackEvent('card_' + index);
 
             loadCard(index);
             const now = Date.now();
@@ -861,10 +847,13 @@
             addToCollection(index);
             
             const isPromo = localStorage.getItem('isPromoActive') === 'true';
-            // Если у тебя был GodMode, добавь его проверку сюда сам, 
-            // в твоем примере выше его не было.
+            const isGod = localStorage.getItem('isGodModeActive') === 'true';
             
-            if (isPromo) {
+            if (isGod) {
+                drawBtn.innerText = "⚡ Вытянуть еще";
+                timerDisplay.innerText = "⚡ БЕЗЛИМИТ";
+            }
+            else if (isPromo) {
                 let drawHistory = JSON.parse(localStorage.getItem('drawHistory') || '[]');
                 drawHistory.push(now);
                 drawHistory = drawHistory.filter(time => (now - time) < PROMO_COOLDOWN_MS);
@@ -875,6 +864,7 @@
                 } else {
                     const left = PROMO_LIMIT_COUNT - drawHistory.length;
                     drawBtn.innerText = `Можно вытянуть ещё: ${left}`;
+                    timerDisplay.innerText = `Доступно еще: ${left}`;
                 }
             } else {
                 let stdHistory = JSON.parse(localStorage.getItem('standardDrawHistory') || '[]');
@@ -887,18 +877,23 @@
                 } else {
                     const left = STANDARD_LIMIT_COUNT - stdHistory.length;
                     drawBtn.innerText = `Можно вытянуть ещё: ${left}`;
+                    timerDisplay.innerText = `Доступно еще: ${left}`;
                 }
             }
             hintText.style.opacity = '1';
         }
 
-        // === 4. ПРОМОКОД И КОЛЛЕКЦИЯ ===
         function updatePromoUI() {
             const isPromo = localStorage.getItem('isPromoActive') === 'true';
+            const isGod = localStorage.getItem('isGodModeActive') === 'true';
             const statusDiv = document.getElementById('promoStatus');
             const inputField = document.getElementById('promoInput');
             
-            if (isPromo) {
+            if (isGod) {
+                statusDiv.innerText = "⚡ БЕЗЛИМИТ АКТИВИРОВАН";
+                inputField.value = GOD_CODE_VALUE;
+                inputField.disabled = true;
+            } else if (isPromo) {
                 statusDiv.innerText = "✅ Режим '2 карты / 12.5 часов' активен";
                 inputField.value = PROMO_CODE_VALUE;
                 inputField.disabled = true;
@@ -911,12 +906,21 @@
             const input = document.getElementById('promoInput').value.trim().toLowerCase();
             const statusDiv = document.getElementById('promoStatus');
             
-            if (input === PROMO_CODE_VALUE) {
+            if (input === GOD_CODE_VALUE) {
+                localStorage.setItem('isGodModeActive', 'true');
+                alert("⚡ БЕЗЛИМИТНЫЙ РЕЖИМ АКТИВИРОВАН");
+                updatePromoUI();
+                unlockButton();
+                checkState();
+                trackEvent('godmode_activated');
+            }
+            else if (input === PROMO_CODE_VALUE) {
                 localStorage.setItem('isPromoActive', 'true');
                 alert("Код принят! Включен режим: 2 карты каждые 12.5 часов.");
                 updatePromoUI();
                 unlockButton(); 
                 checkState();   
+                trackEvent('promo_activated');
             } else {
                 statusDiv.innerText = "❌ Неверный код";
                 setTimeout(() => { updatePromoUI(); }, 2000);
@@ -974,7 +978,6 @@
                     };
                     
                     item.appendChild(downloadBtn);
-                    
                     item.onclick = () => {
                         loadCard(index); 
                         closeCollection(); 
@@ -1025,20 +1028,19 @@
             drawBtn.innerText = "вытащить карточку";
             drawBtn.classList.remove('btn-disabled');
             drawBtn.classList.add('btn-primary');
-            timerDisplay.innerText = "";
+            if (!localStorage.getItem('isGodModeActive')) {
+                timerDisplay.innerText = "";
+            }
             if (window.activeInterval) clearInterval(window.activeInterval);
         }
 
-        // Секретный сброс (7 кликов)
+        const versionLabel = document.getElementById('versionLabel');
         let tapCount = 0;
         let tapTimer = null;
-        const versionLabel = document.getElementById('versionLabel');
-
         versionLabel.addEventListener('click', function() {
             tapCount++;
             clearTimeout(tapTimer);
             tapTimer = setTimeout(() => { tapCount = 0; }, 500);
-
             if (tapCount >= 7) {
                 localStorage.clear(); 
                 alert("🛠 Полный сброс (Обучение появится снова)");
