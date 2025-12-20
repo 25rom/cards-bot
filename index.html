@@ -739,96 +739,66 @@
             checkState(); // ВОТ ТЕПЕРЬ запускаем логику таймеров и анимации
         }
 
+        // === 2. ПРОВЕРКА СОСТОЯНИЯ (ТЕПЕРЬ БЕЗЛИМИТ) ===
         function checkState() {
-            const now = Date.now();
-            const savedCardIndex = localStorage.getItem('savedCardIndex');
-            const isPromo = localStorage.getItem('isPromoActive') === 'true';
-            const isGod = localStorage.getItem('isGodModeActive') === 'true';
+            // Мы больше не проверяем lastDrawTime и не блокируем кнопку.
+            
+            // Всегда разблокируем кнопку
+            unlockButton();
+            hintText.style.opacity = '0';
+            
+            // Ставим мандалу
+            const mandalaUrl = 'https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZzd3YnFwcXRnODU1eGJya3N0ODg2anp6M3U2dzJhbWNnbWw2aGJzMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Pu1SRAVyJJnF70sU3r/giphy.gif';
+            frontImg.src = mandalaUrl; 
+            backImg.src = mandalaUrl; 
 
-            let isLocked = false;
-            let timeRemaining = 0;
+            // Анимация настройки (оставляем для атмосферы)
+            const originalText = "вытащить новую карточку";
+            drawBtn.classList.add('btn-disabled'); 
+            drawBtn.classList.remove('btn-primary');
+            drawBtn.style.pointerEvents = 'none'; 
 
-            if (isGod) {
-                isLocked = false;
-                timerDisplay.innerText = "⚡ БЕЗЛИМИТ";
-            } 
-            else if (isPromo) {
-                let drawHistory = JSON.parse(localStorage.getItem('drawHistory') || '[]');
-                drawHistory = drawHistory.filter(time => (now - time) < PROMO_COOLDOWN_MS);
-                localStorage.setItem('drawHistory', JSON.stringify(drawHistory));
-
-                if (drawHistory.length >= PROMO_LIMIT_COUNT) {
-                    isLocked = true;
-                    const oldestDraw = Math.min(...drawHistory);
-                    timeRemaining = PROMO_COOLDOWN_MS - (now - oldestDraw);
-                } else {
-                    const left = PROMO_LIMIT_COUNT - drawHistory.length;
-                    timerDisplay.innerText = `Доступно еще: ${left}`;
-                }
-            } else {
-                let stdHistory = JSON.parse(localStorage.getItem('standardDrawHistory') || '[]');
-                const oldLastDraw = localStorage.getItem('lastDrawTime');
-                if (oldLastDraw && stdHistory.length === 0) {
-                    stdHistory.push(parseInt(oldLastDraw));
-                    localStorage.removeItem('lastDrawTime');
-                }
-                stdHistory = stdHistory.filter(time => (now - time) < STANDARD_COOLDOWN_MS);
-                localStorage.setItem('standardDrawHistory', JSON.stringify(stdHistory));
-
-                if (stdHistory.length >= STANDARD_LIMIT_COUNT) {
-                    isLocked = true;
-                    const oldestDraw = Math.min(...stdHistory);
-                    timeRemaining = STANDARD_COOLDOWN_MS - (now - oldestDraw);
-                } else {
-                    const left = STANDARD_LIMIT_COUNT - stdHistory.length;
-                    timerDisplay.innerText = `Доступно еще: ${left}`;
-                }
-            }
-
-            if (isLocked) {
-                // Если заблокировано - сразу показываем карту
-                if (savedCardIndex !== null) loadCard(parseInt(savedCardIndex));
-                lockButton(timeRemaining);
-                hintText.style.opacity = '1';
-            } else {
-                // Если доступно - запускаем ПРЕЛЮДИЮ
-                unlockButton();
-                hintText.style.opacity = '0';
-                
-                const mandalaUrl = 'https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZzd3YnFwcXRnODU1eGJya3N0ODg2anp6M3U2dzJhbWNnbWw2aGJzMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Pu1SRAVyJJnF70sU3r/giphy.gif';
-                frontImg.src = mandalaUrl; 
-                backImg.src = mandalaUrl; 
-
-                const originalText = "вытащить новую карточку";
-                drawBtn.classList.add('btn-disabled'); 
-                drawBtn.classList.remove('btn-primary');
-                drawBtn.style.pointerEvents = 'none'; 
-
-                // Анимация текста на кнопке (Тайминг)
-                drawBtn.innerText = "Настройка..."; 
-                
-                setTimeout(() => { drawBtn.innerText = "Вдох..."; }, 1000);
-                setTimeout(() => { drawBtn.innerText = "Выдох..."; }, 3000);
-                setTimeout(() => { drawBtn.innerText = "Синхрония..."; }, 6000);
-                setTimeout(() => {
-                    drawBtn.classList.remove('btn-disabled');
-                    drawBtn.classList.add('btn-primary');
-                    drawBtn.innerText = originalText;
-                    drawBtn.style.pointerEvents = 'auto'; 
-                }, 10000); 
-            }
+            drawBtn.innerText = "Настройка..."; 
+            setTimeout(() => { drawBtn.innerText = "Вдох..."; }, 1000);
+            setTimeout(() => { drawBtn.innerText = "Выдох..."; }, 3000);
+            setTimeout(() => { drawBtn.innerText = "Синхрония..."; }, 6000);
+            setTimeout(() => {
+                drawBtn.classList.remove('btn-disabled');
+                drawBtn.classList.add('btn-primary');
+                drawBtn.innerText = originalText;
+                drawBtn.style.pointerEvents = 'auto'; 
+                // Статус всегда "Готово"
+                timerDisplay.innerText = "✨ Карты готовы";
+            }, 10000); 
         }
 
-        function goldenRatioRandom(max) {
-            const phi = 1.618033988749895;
-            const now = Date.now();
-            const randomVal = (now * phi) % 1; 
-            return Math.floor(randomVal * max);
+        function // === НОВАЯ МЕХАНИКА: УМНЫЙ РАНДОМ (БЕЗ ПОВТОРОВ) ===
+        function getUniqueRandomIndex() {
+            const unlocked = getUnlockedCards(); // Получаем список открытых [0, 5, 12...]
+            const total = cardsDatabase.length;
+            
+            // Создаем список ВСЕХ индексов [0, 1, 2, ... 28]
+            const allIndices = Array.from({length: total}, (_, i) => i);
+            
+            // Оставляем только те, которых НЕТ в unlocked
+            const available = allIndices.filter(i => !unlocked.includes(i));
+
+            // Если все карты уже открыты — просто даем любую случайную
+            if (available.length === 0) {
+                return Math.floor(Math.random() * total);
+            }
+
+            // Выбираем случайную из ДОСТУПНЫХ
+            const randomIndex = Math.floor(Math.random() * available.length);
+            return available[randomIndex];
         }
 
         function handleDrawClick() {
-            if (drawBtn.classList.contains('btn-disabled')) return;
-            const newIndex = goldenRatioRandom(cardsDatabase.length);
+            // Убрали проверку на btn-disabled, так как ограничений больше нет
+            
+            // Получаем уникальную карту
+            const newIndex = getUniqueRandomIndex();
+            
             if (cardElement.classList.contains('is-flipped')) {
                 cardElement.classList.remove('is-flipped');
                 setTimeout(() => { performDraw(newIndex); }, 300);
@@ -837,49 +807,32 @@
             }
         }
 
-        function performDraw(index) {
+      function performDraw(index) {
+            // Аналитика
             trackEvent('card_drawn'); 
             trackEvent('card_' + index);
 
             loadCard(index);
-            const now = Date.now();
-            localStorage.setItem('savedCardIndex', index);
+            
+            // Сохраняем в коллекцию (чтобы не повторялась)
             addToCollection(index);
+            // Сохраняем как текущую (чтобы при перезагрузке она осталась, если надо)
+            localStorage.setItem('savedCardIndex', index);
+
+            // Кнопка остается активной, просто меняем текст
+            drawBtn.innerText = "вытащить еще одну";
             
-            const isPromo = localStorage.getItem('isPromoActive') === 'true';
-            const isGod = localStorage.getItem('isGodModeActive') === 'true';
+            // Показываем сколько осталось карт в колоде (для интереса)
+            const unlockedCount = getUnlockedCards().length;
+            const totalCards = cardsDatabase.length;
+            const left = totalCards - unlockedCount;
             
-            if (isGod) {
-                drawBtn.innerText = "⚡ Вытянуть еще";
-                timerDisplay.innerText = "⚡ БЕЗЛИМИТ";
-            }
-            else if (isPromo) {
-                let drawHistory = JSON.parse(localStorage.getItem('drawHistory') || '[]');
-                drawHistory.push(now);
-                drawHistory = drawHistory.filter(time => (now - time) < PROMO_COOLDOWN_MS);
-                localStorage.setItem('drawHistory', JSON.stringify(drawHistory));
-                if (drawHistory.length >= PROMO_LIMIT_COUNT) {
-                     const oldestDraw = Math.min(...drawHistory);
-                     lockButton(PROMO_COOLDOWN_MS - (now - oldestDraw));
-                } else {
-                    const left = PROMO_LIMIT_COUNT - drawHistory.length;
-                    drawBtn.innerText = `Можно вытянуть ещё: ${left}`;
-                    timerDisplay.innerText = `Доступно еще: ${left}`;
-                }
+            if (left > 0) {
+                timerDisplay.innerText = `В колоде осталось скрытых: ${left}`;
             } else {
-                let stdHistory = JSON.parse(localStorage.getItem('standardDrawHistory') || '[]');
-                stdHistory.push(now);
-                stdHistory = stdHistory.filter(time => (now - time) < STANDARD_COOLDOWN_MS);
-                localStorage.setItem('standardDrawHistory', JSON.stringify(stdHistory));
-                if (stdHistory.length >= STANDARD_LIMIT_COUNT) {
-                     const oldestDraw = Math.min(...stdHistory);
-                     lockButton(STANDARD_COOLDOWN_MS - (now - oldestDraw));
-                } else {
-                    const left = STANDARD_LIMIT_COUNT - stdHistory.length;
-                    drawBtn.innerText = `Можно вытянуть ещё: ${left}`;
-                    timerDisplay.innerText = `Доступно еще: ${left}`;
-                }
+                timerDisplay.innerText = `Вся колода открыта!`;
             }
+
             hintText.style.opacity = '1';
         }
 
