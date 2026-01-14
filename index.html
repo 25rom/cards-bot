@@ -804,57 +804,33 @@
         }
 
         // 4. ОТОБРАЖЕНИЕ КАРТЫ
-        function performDraw(index) {
+    
+       function performDraw(index) {
+            // Аналитика
             trackEvent('card_drawn'); 
             trackEvent('card_' + index);
 
             loadCard(index);
             
-            const now = Date.now();
-            localStorage.setItem('savedCardIndex', index);
+            // Сохраняем в коллекцию (чтобы не повторялась)
             addToCollection(index);
+            // Сохраняем как текущую
+            localStorage.setItem('savedCardIndex', index);
+
+            // Кнопка остается активной, просто меняем текст
+            drawBtn.innerText = "вытащить еще одну";
             
-            // Пересчет лимитов
-            const isPromo = localStorage.getItem('isPromoActive') === 'true';
-            const isGod = localStorage.getItem('isGodModeActive') === 'true';
+            // Обновляем счетчик
+            const unlockedCount = getUnlockedCards().length;
+            const totalCards = cardsDatabase.length;
+            const left = totalCards - unlockedCount;
             
-            if (isGod) {
-                drawBtn.innerText = "⚡ Вытянуть еще";
-                timerDisplay.innerText = "⚡ БЕЗЛИМИТ";
-            }
-            else if (isPromo) {
-                let drawHistory = JSON.parse(localStorage.getItem('drawHistory') || '[]');
-                drawHistory.push(now);
-                localStorage.setItem('drawHistory', JSON.stringify(drawHistory));
-                
-                // Проверяем лимит ПОСЛЕ добавления
-                // Фильтруем
-                drawHistory = drawHistory.filter(time => (now - time) < PROMO_COOLDOWN_MS);
-                
-                if (drawHistory.length >= PROMO_LIMIT_COUNT) {
-                     const oldestDraw = Math.min(...drawHistory);
-                     lockButton(PROMO_COOLDOWN_MS - (now - oldestDraw));
-                } else {
-                    const left = PROMO_LIMIT_COUNT - drawHistory.length;
-                    drawBtn.innerText = `Можно вытянуть ещё: ${left}`;
-                    timerDisplay.innerText = `Доступно еще: ${left}`;
-                }
+            if (left > 0) {
+                timerDisplay.innerText = `В колоде осталось скрытых: ${left}`;
             } else {
-                let stdHistory = JSON.parse(localStorage.getItem('standardDrawHistory') || '[]');
-                stdHistory.push(now);
-                localStorage.setItem('standardDrawHistory', JSON.stringify(stdHistory));
-                
-                stdHistory = stdHistory.filter(time => (now - time) < STANDARD_COOLDOWN_MS);
-                
-                if (stdHistory.length >= STANDARD_LIMIT_COUNT) {
-                     const oldestDraw = Math.min(...stdHistory);
-                     lockButton(STANDARD_COOLDOWN_MS - (now - oldestDraw));
-                } else {
-                    const left = STANDARD_LIMIT_COUNT - stdHistory.length;
-                    drawBtn.innerText = `Можно вытянуть ещё: ${left}`;
-                    timerDisplay.innerText = `Доступно еще: ${left}`;
-                }
+                timerDisplay.innerText = `Вся колода открыта!`;
             }
+
             hintText.style.opacity = '1';
         }
 
