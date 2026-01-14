@@ -795,19 +795,41 @@
         }
 
         function handleDrawClick() {
-            // Убрали проверку на btn-disabled, так как ограничений больше нет
-            
-            // Получаем уникальную карту
-            const newIndex = getUniqueRandomIndex();
-            
-            if (cardElement.classList.contains('is-flipped')) {
-                cardElement.classList.remove('is-flipped');
-                setTimeout(() => { performDraw(newIndex); }, 300);
-            } else {
-                performDraw(newIndex);
-            }
-        }
+            function handleDrawClick() {
+            // Если кнопка заблокирована (таймером или процессом) — выходим
+            if (drawBtn.classList.contains('btn-disabled')) return;
 
+            // 1. БЛОКИРУЕМ КНОПКУ ПЕРЕД МАГИЕЙ
+            drawBtn.classList.add('btn-disabled');
+            drawBtn.classList.remove('btn-primary');
+            drawBtn.style.pointerEvents = 'none'; // Чтобы не кликали лишний раз
+
+            // 2. ЗАПУСКАЕМ АНИМАЦИЮ (Тайминг как в checkState)
+            drawBtn.innerText = "Настройка...";
+            
+            setTimeout(() => { drawBtn.innerText = "Вдох..."; }, 1000);
+            setTimeout(() => { drawBtn.innerText = "Выдох..."; }, 3000);
+            setTimeout(() => { drawBtn.innerText = "Синхрония..."; }, 6000);
+
+            // 3. ФИНАЛ ЧЕРЕЗ 10 СЕКУНД: ВЫЧИСЛЕНИЕ И ПЕРЕВОРОТ
+            setTimeout(() => {
+                // Рандом происходит ТОЛЬКО СЕЙЧАС
+                const newIndex = getUniqueRandomIndex();
+                
+                // Визуально разблокируем (текст обновится внутри performDraw)
+                drawBtn.classList.remove('btn-disabled');
+                drawBtn.classList.add('btn-primary');
+                drawBtn.style.pointerEvents = 'auto';
+
+                // Сама механика переворота
+                if (cardElement.classList.contains('is-flipped')) {
+                    cardElement.classList.remove('is-flipped');
+                    setTimeout(() => { performDraw(newIndex); }, 300);
+                } else {
+                    performDraw(newIndex);
+                }
+            }, 10000); // Ждем 10 секунд
+        }
       function performDraw(index) {
             // Аналитика
             trackEvent('card_drawn'); 
